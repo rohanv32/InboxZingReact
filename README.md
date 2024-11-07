@@ -116,7 +116,7 @@ Here are some key pages in the Inbox Zing app:
   
 - **Styled-Components**: Used for component-based styling, preventing style conflicts and aiding large-scale styling management for large apps and extensive features.
 
-- **JavaScript **: Chosen for its popularity and seamless integration with React, allowing for a clean codebase compatible with modern tools and features.
+- **JavaScript**: Chosen for its popularity and seamless integration with React, allowing for a clean codebase compatible with modern tools and features.
   
 ---
 
