@@ -1,70 +1,118 @@
-# Getting Started with Create React App
+# Inbox Zing
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Inbox Zing is a React-based frontend application that allows users to receive news articles tailored to their preferences based on country, category, and language. Users can create accounts, manage their preferences, and view articles with summaries in a preferred style.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### User Authentication: 
 
-### `npm start`
+Supports user login, sign-up, and logout functionality.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### User Preferences: 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Users can navigate to the preferences section to update their settings.
 
-### `npm test`
+### News Feed: 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+An authenticated user can access a customized news feed.
 
-### `npm run build`
+### Account Management: 
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Allows for account deletion and profile management.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Conditional Rendering: 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Pages and components are conditionally displayed based on user authentication status.
 
-### `npm run eject`
+## Technologies Used
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Frontend:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+React, JavaScript
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Styles: 
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+CSS Modules / Tailwind CSS
 
-## Learn More
+## Setup Instructions
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 1. Clone the repository:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+git clone https://github.com/rohanv32/InboxZingReact.git
+cd InboxZingReact
+```
 
-### Code Splitting
+### 2. Install dependencies:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm install
+```
 
-### Analyzing the Bundle Size
+### 3. Run the development server
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npm start
+```
 
-### Making a Progressive Web App
+This will start the application locally on http://localhost:3000.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Components Documentation
 
-### Advanced Configuration
+### App.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+The main component managing routing, global state, and the rendering of all other components. It sets up the navigation logic based on activeTab and isLoggedIn status.
 
-### Deployment
+### Header.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Displays navigation tabs based on the user's logged-in status, including Home, Sign Up, Login, Preferences, News Feed, Delete User, and Logout.
 
-### `npm run build` fails to minify
+### Home.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+A welcome page for unauthenticated users, providing an overview and links to Login and Sign Up pages.
+
+### Login.js
+
+Handles user login. Contains a form that accepts credentials and authenticates users.
+
+### SignUp.js
+
+Manages the user sign-up process, allowing new users to create an account and navigate to Preferences upon successful registration.
+
+### Preferences.js
+
+Accessible to authenticated users to adjust settings.
+
+### NewsFeed.js
+
+Displays personalized content for authenticated users.
+
+### DeleteUser.js
+
+Allows authenticated users to delete their account.
+
+## Development Process
+
+### Design Decisions
+
+Modular Component Structure: Each feature is encapsulated within its own component, which promotes reusability and simplifies maintenance.
+
+Conditional Rendering Logic: Utilizes React’s conditional rendering to manage access to different parts of the application based on isLoggedIn and activeTab states.
+
+Global State Management: Used Context API for global state, making it easier to manage user sessions across components.
+
+### Technical Choices
+
+React Router: Chose React Router for navigation and routing, allowing for dynamic, single-page navigation.
+
+Context API: Opted for Context API to avoid prop drilling and maintain global state across the application (e.g., isLoggedIn status).
+
+CSS Modules (if used): Modular CSS approach provides scope isolation, which prevents style collisions and enhances maintainability.
+
+### AI Usage
+
+Code Suggestions and Debugging: Leveraged AI for generating code snippets and troubleshooting issues during development, especially while considering CSS style implementation and conditional rendering of pages baesd on login states.
+
+Documentation Assistance: AI was used to streamline the creation of project documentation and provide a structured approach to the README and component documentation.
+
+
