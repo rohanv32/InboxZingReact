@@ -100,13 +100,32 @@ Here are some key pages in the Inbox Zing app:
 - **Styling**: Styled-components / CSS Modules
 
 ---
+## 📝 Design Decisions
 
-## 〰️ Wireframe
+- **React Components**: Each React component is modular and reusable, representing distinct UI parts (e.g., news card, preferences, authentication). This structure simplifies maintenance and scaling.
+  
+- **Card-Based News Feed**: A card layout enhances readability, allowing users to scan headlines and snippets quickly, with clear options for dismissing articles.
+
+- **Responsive Design**: Built using CSS media queries and Grid layouts, the app provides a seamless experience across devices.
+
+- **User-based Customization**: Customizable preferences (e.g., update frequency, language, sources) make the app flexible and tailored to individual needs, boosting engagement.
+
+## ⚙️ Technical Choices 
+
+- **React**: Selected for its component-based structure, efficient rendering, and rich ecosystem, ideal for dynamic and interactive UIs.
+  
+- **Styled-Components**: Used for component-based styling, preventing style conflicts and aiding large-scale styling management for large apps and extensive features.
+
+- **JavaScript **: Chosen for its popularity and seamless integration with React, allowing for a clean codebase compatible with modern tools and features.
+  
+---
+
+## 🥳 Wireframe
 **Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
 
 ---
 
-## 🥳 AI Usage
+## 🤖 AI Usage
 
 Code Suggestions and Debugging: Leveraged AI for generating code snippets and troubleshooting issues during development, especially while considering CSS style implementation and conditional rendering of pages baesd on login states.
 
