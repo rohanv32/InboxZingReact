@@ -98,7 +98,13 @@ Here are some key pages in the Inbox Zing app:
 
 - **Frontend**: React, JavaScript, HTML, CSS
 - **Styling**: Styled-components / CSS Modules
-—
+
+---
+
+## 〰️ Wireframe
+**Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
+
+---
 
 ## 🥳 AI Usage
 
