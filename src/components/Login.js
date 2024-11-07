@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function Login({ onLogin, onNavigateToSignUp }) {
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -9,6 +10,26 @@ function Login({ onLogin, onNavigateToSignUp }) {
     e.preventDefault();
     onLogin();
   };
+
+  const onForgotPassword = () => {
+    setShowForgotPassword(true);
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+  };
+
+  if (showForgotPassword) {
+    return (
+      <ForgotPassword
+        email={formData.username}
+        onEmailChange={(e) => setFormData({ ...formData, username: e.target.value })}
+        onSubmit={() => alert("Verification email sent!")}
+        notification={"Please check your email for further instructions."}
+        onBack={handleBackToLogin}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -60,8 +81,12 @@ function Login({ onLogin, onNavigateToSignUp }) {
           </div>
 
           <div className="text-center">
-            <a href="" className="text-black underline">
-              forgot password?
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); onForgotPassword(); }}
+              className="text-black underline"
+            >
+              Forgot password?
             </a>
           </div>
 
@@ -76,6 +101,59 @@ function Login({ onLogin, onNavigateToSignUp }) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function ForgotPassword({ email, onEmailChange, onSubmit, notification, onBack }) {
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+    onSubmit();
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full p-8">
+        <h1 className="text-center text-3xl font-bold mb-6">Forgot Password</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <input
+              type="email"
+              value={email}
+              onChange={onEmailChange}
+              placeholder="Enter your email"
+              required
+              className="block w-full bg-gray-200 rounded-sm py-2 px-4 text-gray-900 placeholder-gray-900"
+            />
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center rounded-sm bg-[#D5C3C6] py-2 px-4 text-black"
+            >
+              Send Verification Email
+            </button>
+          </div>
+        </form>
+        {submitted && notification && (
+          <div className="text-center text-green-600 mt-4">
+            {notification}
+          </div>
+        )}
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-black underline"
+          >
+            Back to Login
+          </button>
+        </div>
       </div>
     </div>
   );
