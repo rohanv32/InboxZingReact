@@ -1,18 +1,92 @@
 import React, { useState } from 'react';
+import { useUserActions } from './UserContext';
+import { defaultPreferences } from './UserContext';
+
 function SignUp({ onSignUp, onNavigateToLogin }) {
-  const [formData, setFormData] = useState({ 
-    username: '', 
-    email: '', 
-    password: '', 
-    confirmPassword: '' 
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   });
+  const [error, setError] = useState(null);
+  const { setUsername, setPreferences } = useUserActions();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSignUp();
 
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setError(null);
+
+    try {
+      // Sign up API call
+      const response = await fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to sign up.");
+      }
+
+      const result = await response.json();
+      alert(result.message);
+
+      // Set the username in UserContext
+      setUsername(formData.username);
+
+      // Call preferences API to set up default preferences
+      const preferencesResponse = await fetch(`/preferences/${formData.username}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(defaultPreferences)
+      });
+
+      if (!preferencesResponse.ok) {
+        throw new Error("Failed to set up preferences.");
+      }
+
+      const preferencesResult = await preferencesResponse.json();
+      console.log(preferencesResult.message); // Confirm preferences setup
+
+      // Update preferences in context
+      setPreferences(defaultPreferences);
+
+      // Fetch news articles based on preferences
+      const newsResponse = await fetch(`/news/${formData.username}`);
+      if (!newsResponse.ok) {
+        throw new Error("Failed to fetch news articles.");
+      }
+
+      const newsResult = await newsResponse.json();
+      console.log(newsResult.articles); // Check articles in the console
+
+      // Handle fetched news (e.g., store in state, display to the user)
+      // Example: setArticles(newsResult.articles); or pass to a context
+
+      // Clear the form and navigate to login
+      setFormData({ username: '', email: '', password: '', confirmPassword: '' });
+      onNavigateToLogin();
+
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (

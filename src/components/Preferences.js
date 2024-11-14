@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { useUserActions } from './UserContext';
 import { UserContext } from './UserContext';
 import axios from 'axios';
 
@@ -8,6 +9,7 @@ function Preferences({ onUpdateComplete, username }) {
   const [localPreferences, setLocalPreferences] = useState(preferences);
   const [error, setError] = useState('');
 
+  // Predefined options based on your logic
   const COUNTRY_OPTIONS = [
     { code: 'us', name: 'United States' },
     { code: 'ca', name: 'Canada' },
@@ -59,7 +61,7 @@ function Preferences({ onUpdateComplete, username }) {
         }
 
         try {
-          
+          // Update preferences in the database
           await axios.put(`/preferences/${username}`, {
             country: localPreferences.country,
             category: localPreferences.category,
