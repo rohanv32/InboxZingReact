@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defining the header component initially with the tabs available
+const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defining the header initially with the tabs available
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigation = isLoggedIn
@@ -10,6 +10,7 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defi
         { name: 'News Feed', onClick: () => onTabChange('NewsFeed') },
         { name: 'Preferences', onClick: () => onTabChange('Preferences') },
         { name: 'Delete Account', onClick: () => onTabChange('DeleteUser') },
+        { name: 'Profile', onClick: () => onTabChange('Profile') },
         { name: 'Logout', onClick: onLogout },
       ]
     : [];
