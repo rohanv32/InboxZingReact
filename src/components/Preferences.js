@@ -1,36 +1,21 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { UserContext } from './UserContext';
+import axios from 'axios';
 
-function Preferences({ onUpdateComplete }) {
+function Preferences({ onUpdateComplete, username }) {
   const { preferences, setPreferences } = useContext(UserContext);
   const [step, setStep] = useState(1);
   const [localPreferences, setLocalPreferences] = useState(preferences);
   const [error, setError] = useState('');
 
-  const MEDIA_OUTLETS = [
-    'Axios',
-    'The New York Times',
-    'Bloomberg',
-    'Reuters',
-    'Financial Times',
-    'The Guardian'
-  ];
-
-  const TOPICS = [
-    'Artificial Intelligence',
-    'Politics',
-    'Finance',
-    'Sports',
-    'Entertainment',
-    'Sustainability'
-  ];
-
   const COUNTRY_OPTIONS = [
     { code: 'us', name: 'United States' },
     { code: 'ca', name: 'Canada' },
     { code: 'gb', name: 'United Kingdom' },
-    { code: 'fr', name: 'France' },
+    { code: 'fr', name: 'France' }
   ];
+
+  const CATEGORY_OPTIONS = ['business', 'sports', 'entertainment', 'technology', 'health'];
 
   const LANGUAGE_OPTIONS = [
     { code: 'en', name: 'English' },
@@ -39,51 +24,56 @@ function Preferences({ onUpdateComplete }) {
 
   const SUMMARY_STYLE_OPTIONS = ['brief', 'detailed', 'humorous', 'eli5'];
 
-  const handleMultiSelection = (field, value) => {
-    setLocalPreferences(prev => ({
-      ...prev,
-      [field]: prev[field]?.includes(value)
-        ? prev[field].filter(item => item !== value)
-        : [...(prev[field] || []), value]
-    }));
-    setError('');
-  };
-
   const handleSelection = (field, value) => {
-    setLocalPreferences(prev => ({
+    setLocalPreferences((prev) => ({
       ...prev,
       [field]: value
     }));
     setError('');
   };
 
-  const handleNext = () => {
-    switch(step) {
+  const handleNext = async () => {
+    switch (step) {
       case 1:
-        if (!localPreferences.mediaOutlets?.length) {
-          setError('Please select at least one media outlet');
+        if (!localPreferences.country) {
+          setError('Please select a country');
           return;
         }
         break;
       case 2:
-        if (!localPreferences.country || !localPreferences.language) {
-          setError('Please select both country and language');
+        if (!localPreferences.category) {
+          setError('Please select a category');
           return;
         }
         break;
       case 3:
-        if (!localPreferences.topics?.length) {
-          setError('Please select at least one topic of interest');
+        if (!localPreferences.language) {
+          setError('Please select a language');
           return;
         }
         break;
       case 4:
-        if (!localPreferences.agenda || !localPreferences.frequency || !localPreferences.summaryStyle) {
+        if (!localPreferences.summaryStyle || !localPreferences.frequency) {
           setError('Please complete all preferences');
           return;
         }
-        setPreferences(localPreferences);
-        onUpdateComplete();
+
+        try {
+          
+          await axios.put(`/preferences/${username}`, {
+            country: localPreferences.country,
+            category: localPreferences.category,
+            language: localPreferences.language,
+            summaryStyle: localPreferences.summaryStyle,
+            frequency: localPreferences.frequency
+          });
+
+          setPreferences(localPreferences);
+          onUpdateComplete();
+        } catch (error) {
+          console.error("Error updating preferences:", error);
+          setError("Failed to update preferences. Please try again.");
+        }
         return;
     }
     setStep(step + 1);
@@ -91,26 +81,24 @@ function Preferences({ onUpdateComplete }) {
   };
 
   const renderStep = () => {
-    switch(step) {
+    switch (step) {
       case 1:
         return (
           <>
-            <h2 className="text-xl text-center mb-8">
-              Choose your media outlets!
-            </h2>
+            <h2 className="text-xl text-center mb-8">Select your country</h2>
             <div className="space-y-3">
-              {MEDIA_OUTLETS.map((outlet) => (
+              {COUNTRY_OPTIONS.map((country) => (
                 <button
-                  key={outlet}
-                  onClick={() => handleMultiSelection('mediaOutlets', outlet)}
+                  key={country.code}
+                  onClick={() => handleSelection('country', country.code)}
                   className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                    localPreferences.mediaOutlets?.includes(outlet) ? 'border-2 border-[#D5C3C6]' : ''
+                    localPreferences.country === country.code ? 'border-2 border-[#D5C3C6]' : ''
                   }`}
                 >
                   <div className={`w-4 h-4 rounded-full mr-4 ${
-                    localPreferences.mediaOutlets?.includes(outlet) ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                    localPreferences.country === country.code ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
                   }`}></div>
-                  {outlet}
+                  {country.name}
                 </button>
               ))}
             </div>
@@ -120,41 +108,22 @@ function Preferences({ onUpdateComplete }) {
       case 2:
         return (
           <>
-            <h2 className="text-xl text-center mb-8">
-              Choose your country and language
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <p className="mb-3 text-center">Country</p>
-                <select 
-                  value={localPreferences.country || ''}
-                  onChange={(e) => handleSelection('country', e.target.value)}
-                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
+            <h2 className="text-xl text-center mb-8">Select a news category</h2>
+            <div className="space-y-3">
+              {CATEGORY_OPTIONS.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => handleSelection('category', category)}
+                  className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                    localPreferences.category === category ? 'border-2 border-[#D5C3C6]' : ''
+                  }`}
                 >
-                  <option value="">Select country</option>
-                  {COUNTRY_OPTIONS.map(country => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <p className="mb-3 text-center">Language</p>
-                <select 
-                  value={localPreferences.language || ''}
-                  onChange={(e) => handleSelection('language', e.target.value)}
-                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
-                >
-                  <option value="">Select language</option>
-                  {LANGUAGE_OPTIONS.map(language => (
-                    <option key={language.code} value={language.code}>
-                      {language.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className={`w-4 h-4 rounded-full mr-4 ${
+                    localPreferences.category === category ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                  }`}></div>
+                  {category}
+                </button>
+              ))}
             </div>
           </>
         );
@@ -162,22 +131,20 @@ function Preferences({ onUpdateComplete }) {
       case 3:
         return (
           <>
-            <h2 className="text-xl text-center mb-8">
-              Choose your topics of Interest!
-            </h2>
+            <h2 className="text-xl text-center mb-8">Select your language</h2>
             <div className="space-y-3">
-              {TOPICS.map((topic) => (
+              {LANGUAGE_OPTIONS.map((language) => (
                 <button
-                  key={topic}
-                  onClick={() => handleMultiSelection('topics', topic)}
+                  key={language.code}
+                  onClick={() => handleSelection('language', language.code)}
                   className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                    localPreferences.topics?.includes(topic) ? 'border-2 border-[#D5C3C6]' : ''
+                    localPreferences.language === language.code ? 'border-2 border-[#D5C3C6]' : ''
                   }`}
                 >
                   <div className={`w-4 h-4 rounded-full mr-4 ${
-                    localPreferences.topics?.includes(topic) ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                    localPreferences.language === language.code ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
                   }`}></div>
-                  {topic}
+                  {language.name}
                 </button>
               ))}
             </div>
@@ -187,52 +154,8 @@ function Preferences({ onUpdateComplete }) {
       case 4:
         return (
           <>
-            <h2 className="text-xl text-center mb-8">
-              Final Preferences
-            </h2>
+            <h2 className="text-xl text-center mb-8">Final Preferences</h2>
             <div className="space-y-6">
-              <div>
-                <p className="mb-3 text-center">What is your agenda of use?</p>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleSelection('agenda', 'Stay Up To Date')}
-                    className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                      localPreferences.agenda === 'Stay Up To Date' ? 'border-2 border-[#D5C3C6]' : ''
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded-full mr-4 ${
-                      localPreferences.agenda === 'Stay Up To Date' ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                    }`}></div>
-                    Stay Up To Date
-                  </button>
-                  <button
-                    onClick={() => handleSelection('agenda', 'Deep Dive Into Topics')}
-                    className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                      localPreferences.agenda === 'Deep Dive Into Topics' ? 'border-2 border-[#D5C3C6]' : ''
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded-full mr-4 ${
-                      localPreferences.agenda === 'Deep Dive Into Topics' ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                    }`}></div>
-                    Deep Dive Into Topics
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-3 text-center">Delivery Frequency</p>
-                <select 
-                  value={localPreferences.frequency || ''}
-                  onChange={(e) => handleSelection('frequency', e.target.value)}
-                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
-                >
-                  <option value="">Select frequency</option>
-                  <option value="6">Every 6 Hours</option>
-                  <option value="12">Every 12 Hours</option>
-                  <option value="24">Daily</option>
-                </select>
-              </div>
-
               <div>
                 <p className="mb-3 text-center">Summary Style</p>
                 <select 
@@ -248,6 +171,22 @@ function Preferences({ onUpdateComplete }) {
                   ))}
                 </select>
               </div>
+
+              <div>
+                <p className="mb-3 text-center">Delivery Frequency (hours)</p>
+                <select 
+                  value={localPreferences.frequency || ''}
+                  onChange={(e) => handleSelection('frequency', parseInt(e.target.value))}
+                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
+                >
+                  <option value="">Select frequency</option>
+                  <option value="1">Every 1 Hour</option>
+                  <option value="3">Every 3 Hours</option>
+                  <option value="6">Every 6 Hours</option>
+                  <option value="12">Every 12 Hours</option>
+                  <option value="24">Daily</option>
+                </select>
+              </div>
             </div>
           </>
         );
@@ -257,9 +196,7 @@ function Preferences({ onUpdateComplete }) {
   return (
     <div className="flex min-h-screen flex-col items-center p-8">
       <div className="max-w-md w-full">
-        <h1 className="text-4xl font-bold text-center mb-8">
-          THE INBOX ZING!
-        </h1>
+        <h1 className="text-4xl font-bold text-center mb-8">Update your News Preferences</h1>
         
         {renderStep()}
 
