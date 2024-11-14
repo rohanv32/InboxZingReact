@@ -1,9 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';  
 
-function DeleteUser({ onDelete }) {
+function DeleteUser({ onDelete, username }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();  
+
   // Function to create the delete button click for deleting the user
-  const handleDelete = () => {
-    onDelete();
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/user/${username}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      // after delete is processed
+      onDelete();
+
+      // clear session and log the user out
+     
+      localStorage.removeItem('authToken');  
+      sessionStorage.removeItem('authToken'); 
+
+      // Redirect to login after account deletion
+      navigate('/login'); 
+
+    } catch (err) {
+      setError('An error occurred while deleting your account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,12 +56,15 @@ function DeleteUser({ onDelete }) {
           Are you sure you want to delete your account? This action cannot be undone.
         </p>
 
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        
         {/* User presses on Delete button to initiates handleDelete */}
         <button 
           onClick={handleDelete} 
           className="w-full flex justify-center rounded-sm bg-[#D5C3C6] py-3 text-black"
+          disabled={loading}
         >
-          Delete Account
+          {loading ? 'Deleting...' : 'Delete Account'}
         </button>
         
         {/* Link to renavigate to settings page */}
