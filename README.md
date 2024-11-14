@@ -99,6 +99,10 @@ Here are some key pages in the Inbox Zing app:
 - **Frontend**: React, JavaScript, HTML, CSS
 - **Styling**: Styled-components / CSS Modules
 
+**Backend Guide**
+
+  Please go to https://github.com/rohanv32/InboxZing and follow the set up instructions there.
+
 ---
 ## 📝 Design Decisions
 
@@ -132,5 +136,3 @@ Code Suggestions and Debugging: Leveraged AI for generating code snippets and tr
 Documentation Assistance: AI was used to streamline the creation of project documentation and provide a structured approach to the README and component documentation.
 
 
-
-```
