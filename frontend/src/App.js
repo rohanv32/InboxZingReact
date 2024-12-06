@@ -20,6 +20,10 @@ function App() {
   const [newsArticles, setNewsArticles] = useState([]);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
+  }, []);
+
   const handleLogin = async (credentials) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
