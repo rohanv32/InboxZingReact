@@ -12,7 +12,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
     console.log("Form Data: ", formData);
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -29,7 +29,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
 
         // Fetch news for the logged-in user
         try {
-          const newsResponse = await fetch(`/news/${formData.username}`);
+          const newsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${formData.username}`);
           if (newsResponse.ok) {
             const newsData = await newsResponse.json();
             console.log("Fetched news data:", newsData); // Log the fetched news data

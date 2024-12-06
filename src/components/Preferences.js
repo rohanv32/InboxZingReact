@@ -3,6 +3,8 @@ import { useUserActions } from './UserContext';
 import { UserContext } from './UserContext';
 import axios from 'axios';
 
+let NEWS_API_URL = "https://newsapi.org/v2/top-headlines/sources";
+
 function Preferences({ onUpdateComplete, username }) {
   const { preferences, setPreferences } = useContext(UserContext);
   const [step, setStep] = useState(1);
@@ -17,7 +19,7 @@ function Preferences({ onUpdateComplete, username }) {
     { code: 'fr', name: 'France' }
   ];
 
-  const CATEGORY_OPTIONS = ['business', 'sports', 'entertainment', 'technology', 'health'];
+  const CATEGORY_OPTIONS = ['general', 'business', 'sports', 'entertainment', 'technology', 'health'];
 
   const LANGUAGE_OPTIONS = [
     { code: 'en', name: 'English' },
@@ -62,7 +64,7 @@ function Preferences({ onUpdateComplete, username }) {
 
         try {
           // Update preferences in the database
-          await axios.put(`/preferences/${username}`, {
+          await axios.put(`${process.env.REACT_APP_BACKEND_URL}/preferences/${username}`, {
             country: localPreferences.country,
             category: localPreferences.category,
             language: localPreferences.language,

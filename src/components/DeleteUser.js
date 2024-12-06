@@ -12,7 +12,7 @@ function DeleteUser({ onDelete, username }) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/user/${username}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

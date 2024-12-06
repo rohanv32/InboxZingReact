@@ -19,7 +19,7 @@ function NewsFeed({ newsArticles, username }) {
     if (preferences.country && preferences.category && preferences.language) {
       const fetchArticles = async () => {
         try {
-          const response = await fetch(`/news/${username}`);
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${username}`);
           if (!response.ok) {
             throw new Error('Failed to fetch news articles');
           }

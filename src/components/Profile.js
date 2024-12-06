@@ -16,7 +16,7 @@ function Profile({ username, onNavigatetoPreferences }) {
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
-        const response = await fetch(`/user/${username}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}`);
         if (!response.ok) throw new Error("Unable to fetch preferences");
         const data = await response.json();
         setPreferences(data.preferences);
@@ -53,7 +53,7 @@ function Profile({ username, onNavigatetoPreferences }) {
     }
 
     try {
-      const response = await fetch(`/user/${username}/password`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
