@@ -33,4 +33,4 @@ RUN printf 'server {\n\
 }\n' > /etc/nginx/conf.d/default.conf.template
 
 # Use shell to substitute PORT value in nginx.conf
-CMD sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+CMD sh -c "envsubst '\$PORT \$REACT_APP_BACKEND_URL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
