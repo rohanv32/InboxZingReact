@@ -14,10 +14,10 @@ RUN npm install
 COPY . .
 
 # Set the REACT_APP_BACKEND_URL environment variable before building the React app
-ARG REACT_APP_BACKEND_URL
-ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+ARG REACT_APP_BACKEND_URL  # Define the build argument
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL  # Set the env variable inside Docker container
 
-# Build application
+# Build the React application
 RUN npm run build
 
 # Runtime stage
@@ -26,7 +26,7 @@ FROM nginx:alpine
 # Copy built files from builder
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Create nginx.conf that reads PORT environment variable from cloud run - google assigns random ports, so we need this
+# Create nginx.conf that reads the PORT environment variable from Cloud Run
 RUN printf 'server {\n\
     listen ${PORT};\n\
     location / {\n\
@@ -36,5 +36,5 @@ RUN printf 'server {\n\
     }\n\
 }\n' > /etc/nginx/conf.d/default.conf.template
 
-# Use shell to substitute PORT value in nginx.conf
+# Use shell to substitute PORT and REACT_APP_BACKEND_URL values into the nginx.conf
 CMD sh -c "envsubst '\$PORT \$REACT_APP_BACKEND_URL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
