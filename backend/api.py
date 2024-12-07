@@ -25,8 +25,6 @@ from groq import Groq
 import asyncio
 import re
 import secrets
-from pydantic import BaseModel
-
 
 AudioSegment.converter = which("ffmpeg") 
 AudioSegment.ffprobe = which("ffprobe")
@@ -45,6 +43,7 @@ class UserCreate(BaseModel):
     password: str
     points: int = 0
     last_login: Optional[datetime] = None
+    confirmation_code: Optional[str] = None
 
 # Model used to capture login credentials for logging in of an existing user
 class UserLogin(BaseModel):
@@ -58,15 +57,6 @@ class UserPreferences(BaseModel):
     sources: str
     summaryStyle: str
     frequency: int
-
-class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
-    points: int = 0
-    last_login: Optional[datetime] = None
-    confirmation_code: Optional[str] = None
-
 
 # Model used to capture the news articles that match user preferences
 class NewsArticle(BaseModel):
@@ -85,6 +75,10 @@ class UpdatePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
+class VerifyConfirmationCodeRequest(BaseModel):
+    email: str
+    code: str
+
 # loading the env variables and starting the fastapi
 load_dotenv()
 fast_app = FastAPI()
@@ -96,6 +90,7 @@ MONGO_URI = os.getenv("MONGO_URI")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 print(f"Backend API Key: {NEWS_API_KEY}")
 openai.api_key = os.getenv("openai.api_key")
+
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client['news_app']
 users_collection = db['users']
@@ -104,10 +99,10 @@ grok_api_key = os.environ.get("GROQ_API_KEY")
 grok_client = Groq(api_key=grok_api_key)
 
 temp_users_collection = db['temp_users']
+
 # uniqueness of email and username maintained
 users_collection.create_index([("email", 1)], unique=True)
 users_collection.create_index([("username", 1)], unique=True)
-
 NEWS_API_URL = "https://newsapi.org/v2/top-headlines"
 
 # Password hashing function
@@ -121,7 +116,6 @@ def verify_password(stored_password: str, provided_password: str) -> bool:
 def fetch_news(preferences: UserPreferences) -> List[dict]:
     articles = []
     page = 1  # Start fetching from the first page
-
     while len(articles) < 10:  # Keep fetching until we have 10 articles
         params = {
             'apiKey': NEWS_API_KEY,
@@ -129,7 +123,6 @@ def fetch_news(preferences: UserPreferences) -> List[dict]:
             'pageSize': 10,  # Fetch 10 articles per request
             'page': page  # Fetch the next page
         }
-
         response = requests.get(NEWS_API_URL, params=params)
         
         if response.status_code == 200:
@@ -143,20 +136,16 @@ def fetch_news(preferences: UserPreferences) -> List[dict]:
                 # Stop if we already have 10 complete articles
                 if len(articles) >= 10:
                     break
-
         page += 1  # Move to the next page
-
         # If no new articles were fetched, break the loop to prevent an infinite loop
         if not new_articles:
             break
-
     return articles[:10]
 
 def summarize_article(article: dict, summary_style: str) -> str:
     content = article.get("content", "No content available.")
     if not content:  
         content = article.get("title", "No content or title available.")
-
     if summary_style == "Brief":
         prompt = f"Summarize this article briefly, keeping it insightful, yet concise. Please go straight into the summary, do not repeat the prompt in any way.: {content}"
     elif summary_style == "Detailed":
@@ -171,16 +160,13 @@ def summarize_article(article: dict, summary_style: str) -> str:
         prompt = f"Turn this article into a poetic recitation, that is intriguing, yet informative: {content}"
     else:
         prompt = f"Provide a generic summary of this article: {content}"
-
     chat_completion = grok_client.chat.completions.create(
         messages=[
             {"role": "user", "content": prompt}
         ],
         model="llama3-8b-8192",
     )
-
     response = chat_completion.choices[0].message.content.strip()
-
     def clean_summary(summary: str, style: str) -> str:
         
         patterns = [
@@ -192,7 +178,6 @@ def summarize_article(article: dict, summary_style: str) -> str:
         ]
         combined_pattern = re.compile("|".join(patterns), re.IGNORECASE)
         return re.sub(combined_pattern, "", summary).strip()
-
     cleaned_response = clean_summary(response, summary_style)
     return cleaned_response
         
@@ -209,12 +194,46 @@ def send_news_summary_email(user_email: str, username: str, articles: List[dict]
         email_body += f"Summary: {article.get('summary', 'No summary available')}\n\n"
     
     email_body += "Stay informed!\n"
-
     # Create email message
     message = Mail(
         from_email=sendgrid_email,  # Must be a verified sender in SendGrid
         to_emails=user_email,
         subject=f'{username}, Your News Summary',
+        html_content=f'<pre>{email_body}</pre>'
+    )
+    try:
+        # Send email using SendGrid
+        sg = SendGridAPIClient(sendgrid_api_key)
+        response = sg.send(message)
+        print(f"Email sent to {user_email}. Status Code: {response.status_code}")
+        return True
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
+    
+# All endpoints are added below
+@fast_app.get("/status")
+async def get_status(username: str = Cookie(None)):
+    if username:
+        # If a username cookie is present, it means the user is logged in
+        return {"isLoggedIn": True, "username": username}
+    else:
+        # If no cookie, the user is not logged in
+        return {"isLoggedIn": False, "username": None}
+    
+def send_confirmation_email(user_email: str, confirmation_code: str):
+    # Get SendGrid API Key from environment
+    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+    sendgrid_email = os.getenv('SENDGRID_FROM_EMAIL')
+
+    # Prepare email content
+    email_body = f"Hi,\n\nYour confirmation code is: {confirmation_code}\n\nPlease use this code to confirm your account.\n\nStay informed!"
+
+    # Create email message
+    message = Mail(
+        from_email=sendgrid_email,  # Must be a verified sender in SendGrid
+        to_emails=user_email,
+        subject='Confirm Your Account',
         html_content=f'<pre>{email_body}</pre>'
     )
 
@@ -228,46 +247,6 @@ def send_news_summary_email(user_email: str, username: str, articles: List[dict]
         print(f"Error sending email: {e}")
         return False
     
-# All endpoints are added below
-
-@fast_app.get("/status")
-async def get_status(username: str = Cookie(None)):
-    if username:
-        # If a username cookie is present, it means the user is logged in
-        return {"isLoggedIn": True, "username": username}
-    else:
-        # If no cookie, the user is not logged in
-        return {"isLoggedIn": False, "username": None}
-    
-# # Endpoint to handle signing up a a new user
-# @fast_app.post("/signup")
-# async def signup(user: UserCreate):
-#     # Hash the user's password for security
-#     hashed_password = hash_password(user.password)
-    
-#     # Check if the username already exists
-#     existing_user = users_collection.find_one({"username": user.username})
-#     if existing_user:
-#         raise HTTPException(status_code=400, detail="Username already exists")
-#     # Create the new user document
-#     new_user = {
-#         "username": user.username,
-#         "email": user.email,
-#         "password": hashed_password,
-#         "created_at": datetime.now(),
-#         "points": 0,
-#         "streak": 0,
-#         "last_login": None,
-#     }
-
-#     # Try to insert the new user into the database
-#     try:
-#         users_collection.insert_one(new_user)
-#                 # Send confirmation email
-#         send_confirmation_email(user.email, confirmation_code)
-#         return {"message": "User created successfully. Please check your email to confirm your account."}
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=f"Error creating user: {str(e)}")
 @fast_app.post("/signup")
 async def signup(user: UserCreate):
     # Hash the user's password for security
@@ -304,36 +283,6 @@ async def signup(user: UserCreate):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error initiating signup: {str(e)}")
 
-def send_confirmation_email(user_email: str, confirmation_code: str):
-    # Get SendGrid API Key from environment
-    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
-    sendgrid_email = os.getenv('SENDGRID_FROM_EMAIL')
-
-    # Prepare email content
-    email_body = f"Hi,\n\nYour confirmation code is: {confirmation_code}\n\nPlease use this code to confirm your account.\n\nStay informed!"
-
-    # Create email message
-    message = Mail(
-        from_email=sendgrid_email,  # Must be a verified sender in SendGrid
-        to_emails=user_email,
-        subject='Confirm Your Account',
-        html_content=f'<pre>{email_body}</pre>'
-    )
-
-    try:
-        # Send email using SendGrid
-        sg = SendGridAPIClient(sendgrid_api_key)
-        response = sg.send(message)
-        print(f"Email sent to {user_email}. Status Code: {response.status_code}")
-        return True
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        return False
-
-class VerifyConfirmationCodeRequest(BaseModel):
-    email: str
-    code: str
-
 @fast_app.post("/verify_confirmation")
 async def verify_confirmation(request: VerifyConfirmationCodeRequest):
     temp_user = temp_users_collection.find_one({"email": request.email})
@@ -361,7 +310,31 @@ async def verify_confirmation(request: VerifyConfirmationCodeRequest):
             raise HTTPException(status_code=400, detail=f"Error confirming account: {str(e)}")
     else:
         raise HTTPException(status_code=400, detail="Invalid confirmation code")
-
+    
+# # Endpoint to handle logging in a user
+# @fast_app.post("/login")
+# async def login(user: UserLogin):
+#     db_user = users_collection.find_one({"username": user.username})
+#     if db_user and db_user["password"] == hash_password(user.password):
+#       # if username and password match user in db, login is successful
+#         print("Backend login successful for:", user.username)
+#         now = datetime.now()
+#         last_login = db_user.get("last_login")
+#         streak = db_user.get("streak", 0)
+#         if last_login:
+#             last_login_date = last_login.date()
+#             if now.date() == last_login_date + timedelta(days=1):
+#                 streak += 1  # Increment streak for consecutive days
+#             elif now.date() > last_login_date + timedelta(days=1):
+#                 streak = 0  # Reset streak for missed days
+#         # Update last_login and streak
+#         users_collection.update_one(
+#             {"username": user.username},
+#             {"$set": {"last_login": now, "streak": streak}}
+#         )
+#         return JSONResponse(content={"message": "Login successful", "username": user.username})
+#         # if error display this message
+#     raise HTTPException(status_code=401, detail="Invalid username or password")
 @fast_app.post("/login")
 async def login(user: UserLogin):
     db_user = users_collection.find_one({"username": user.username})
@@ -370,13 +343,11 @@ async def login(user: UserLogin):
         now = datetime.now()
         last_login = db_user.get("last_login")
         streak = db_user.get("streak", 0)
-
         # Check if preferences exist and frequency is set
         if "preferences" in db_user and "frequency" in db_user["preferences"]:
             # Check if it's time to send an email
             last_email_sent = db_user.get("last_email_sent")
             frequency_hours = db_user["preferences"]["frequency"]
-
             # If no last email sent or time since last email exceeds frequency
             if not last_email_sent or (now - last_email_sent).total_seconds() / 3600 >= frequency_hours:
                 # Fetch news articles
@@ -384,16 +355,14 @@ async def login(user: UserLogin):
                     # Use the existing get_news function to fetch articles
                     news_response = await get_news(user.username)
                     articles = news_response.get("articles", [])
-
                     # Send email if articles exist
                     if articles:
                         email_sent = send_news_summary_email(
                             user_email=db_user["email"],
                             username=user.username,
                             articles=articles,
-                            summary_style=db_user["preferences"].get("summaryStyle", "brief")
+                            summary_style=db_user["preferences"].get("summaryStyle", "Humorous")
                         )
-
                         # Update last email sent time if email was sent successfully
                         if email_sent:
                             users_collection.update_one(
@@ -402,86 +371,20 @@ async def login(user: UserLogin):
                             )
                 except Exception as e:
                     print(f"Error processing news for email: {e}")
-
-        # Rest of your existing login logic remains the same
         if last_login:
             last_login_date = last_login.date()
             if now.date() == last_login_date + timedelta(days=1):
-                streak += 1  # Increment streak for consecutive days
+                streak += 1  
             elif now.date() > last_login_date + timedelta(days=1):
-                streak = 0  # Reset streak for missed days
-
+                streak = 0 
         # Update last_login and streak
         users_collection.update_one(
             {"username": user.username},
             {"$set": {"last_login": now, "streak": streak}}
         )
-
         return JSONResponse(content={"message": "Login successful", "username": user.username})
-
-    raise HTTPException(status_code=401, detail="Invalid username or password")
-
-
-
-# @fast_app.post("/login")
-# async def login(user: UserLogin):
-#     db_user = users_collection.find_one({"username": user.username})
-#     if db_user and db_user["password"] == hash_password(user.password):
-#         print("Backend login successful for:", user.username)
-#         now = datetime.now()
-#         last_login = db_user.get("last_login")
-#         streak = db_user.get("streak", 0)
-
-#         # Check if preferences exist and frequency is set
-#         if "preferences" in db_user and "frequency" in db_user["preferences"]:
-#             # Check if it's time to send an email
-#             last_email_sent = db_user.get("last_email_sent")
-#             frequency_hours = db_user["preferences"]["frequency"]
-
-#             # If no last email sent or time since last email exceeds frequency
-#             if not last_email_sent or (now - last_email_sent).total_seconds() / 3600 >= frequency_hours:
-#                 # Fetch news articles
-#                 try:
-#                     # Use the existing get_news function to fetch articles
-#                     news_response = await get_news(user.username)
-#                     articles = news_response.get("articles", [])
-
-#                     # Send email if articles exist
-#                     if articles:
-#                         email_sent = send_news_summary_email(
-#                             user_email=db_user["email"],
-#                             username=user.username,
-#                             articles=articles,
-#                             summary_style=db_user["preferences"].get("summaryStyle", "brief")
-#                         )
-
-#                         # Update last email sent time if email was sent successfully
-#                         if email_sent:
-#                             users_collection.update_one(
-#                                 {"username": user.username},
-#                                 {"$set": {"last_email_sent": now}}
-#                             )
-#                 except Exception as e:
-#                     print(f"Error processing news for email: {e}")
-
-#         # Rest of your existing login logic remains the same
-#         if last_login:
-#             last_login_date = last_login.date()
-#             if now.date() == last_login_date + timedelta(days=1):
-#                 streak += 1  # Increment streak for consecutive days
-#             elif now.date() > last_login_date + timedelta(days=1):
-#                 streak = 0  # Reset streak for missed days
-
-#         # Update last_login and streak
-#         users_collection.update_one(
-#             {"username": user.username},
-#             {"$set": {"last_login": now, "streak": streak}}
-#         )
-
-#         return JSONResponse(content={"message": "Login successful", "username": user.username})
     
-#     raise HTTPException(status_code=401, detail="Invalid username or password")
-
+    raise HTTPException(status_code=401, detail="Invalid username or password")
 # Endpoint to handle modifying of previously set user preferences
 @fast_app.put("/preferences/{username}")
 async def update_preferences(username: str, preferences: UserPreferences):
@@ -498,26 +401,21 @@ async def update_preferences(username: str, preferences: UserPreferences):
         # Construct the path to the audio file
         audio_dir = os.path.join("src", "audio")
         final_audio_file = os.path.join(audio_dir, f"{username}_final_podcast_audio.wav")
-
         # Check if the audio file exists and delete it if it does
         if os.path.exists(final_audio_file):
             os.remove(final_audio_file)
             print(f"Deleted existing audio file: {final_audio_file}")
         return {"message": "Preferences updated successfully"}
     raise HTTPException(status_code=404, detail="User not found")
-
 @fast_app.get("/news/{username}")
 async def get_news(username: str):
     user = users_collection.find_one({"username": username})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     preferences = user.get("preferences")
     if not preferences:
         raise HTTPException(status_code=400, detail="User preferences not set")
-
     user_news_doc = news_articles_collection.find_one({"username": username})
-
     # Check if the preferences have changed (e.g., compare the stored preferences with the current ones)
     if user_news_doc and user_news_doc['preferences'] == preferences:
         if datetime.now() - user_news_doc['fetched_at'] < timedelta(hours=preferences['frequency']):
@@ -539,7 +437,6 @@ async def get_news(username: str):
                     "summary": summary,
                     "isRead": False 
                 })
-
             # Update the user's document with the new articles
             news_articles_collection.update_one(
                 {"username": username},
@@ -569,7 +466,6 @@ async def get_news(username: str):
                 "summary": summary,
                 "isRead": False
             })
-
         # Update the user's document with the new articles and preferences
         news_articles_collection.update_one(
             {"username": username},
@@ -583,9 +479,7 @@ async def get_news(username: str):
             },
             upsert=True
         )
-
     return {"articles": articles}
-
 @fast_app.patch("/news/{username}/mark_as_read")
 async def mark_article_as_read(username: str, article_url: str, readingTime: int = 0):
     # Find the user
@@ -597,7 +491,6 @@ async def mark_article_as_read(username: str, article_url: str, readingTime: int
     user_news_doc = news_articles_collection.find_one({"username": username})
     if not user_news_doc:
         raise HTTPException(status_code=404, detail="No news data found for this user")
-
     # Update the "isRead" state for the specific article
     updated_articles = []
     for article in user_news_doc["articles"]:
@@ -615,9 +508,7 @@ async def mark_article_as_read(username: str, article_url: str, readingTime: int
             }
         }
     )
-
     return {"message": "Article marked as read", "url": article_url}
-
 @fast_app.get("/news/{username}/statistics")
 async def get_news_statistics(username: str):
     user = users_collection.find_one({"username": username})
@@ -636,14 +527,11 @@ async def get_news_statistics(username: str):
     
     # Calculate total time spent (assuming each article has a 'timeSpent' field in seconds)
     total_time_spent = sum(article.get("readingTime", 0) for article in user_news_doc["articles"])
-
     return {
         "articlesRead": read_articles,
         "articlesLeft": unread_articles,
         "readingTime": total_time_spent,
     }
-
-
 # Endpoint to get preferences for the Profile Page display
 @fast_app.get("/user/{username}", response_model=UserPreferencesResponse)
 async def get_user_preferences(username: str):
@@ -651,7 +539,6 @@ async def get_user_preferences(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"username": user["username"], "preferences": user.get("preferences", {})}
-
 # Endpoint to handle password update
 @fast_app.put("/user/{username}/password")
 async def update_user_password(username: str, request: UpdatePasswordRequest):
@@ -660,14 +547,11 @@ async def update_user_password(username: str, request: UpdatePasswordRequest):
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-
     # Verify current password
     if not verify_password(user['password'], request.current_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
-
     # Hash new password
     hashed_password = hash_password(request.new_password)
-
     # Update the password in the database
     result = users_collection.update_one(
         {"username": username},
@@ -678,7 +562,6 @@ async def update_user_password(username: str, request: UpdatePasswordRequest):
         raise HTTPException(status_code=404, detail="Password unchanged")
     
     return {"message": "Password updated successfully"}
-
 # Endpoint to get all news articles stored in the database
 @fast_app.get("/news_articles/")
 async def get_news_articles():
@@ -687,7 +570,6 @@ async def get_news_articles():
     for article in articles:
         article["_id"] = str(article["_id"])
     return articles
-
 # Endpoint to delete a user from the database with his stored data
 @fast_app.delete("/user/{username}")
 async def delete_user(username: str):
@@ -699,7 +581,6 @@ async def delete_user(username: str):
         return {"message": f"User {username} and articles associated with the account are deleted"}
     # error handling part when the user is not found
     raise HTTPException(status_code=404, detail="User not found")
-
 async def generate_podcast_script(articles, summary_style, username):
     if not isinstance(articles, list) or not articles:
         print("No articles or invalid structure provided.")
@@ -712,7 +593,6 @@ async def generate_podcast_script(articles, summary_style, username):
             description = article.get('description', 'No Description Available')
             source = article.get('source', 'Unknown Source') 
             news_content += f"{idx}. Title: {title}\nSource: {source}\nSummary: {description}\n\n"
-
         prompt = (
             f"You are a creative assistant skilled in writing engaging and entertaining podcast scripts. "
             f"Below is a collection of summarized news articles. Create a seamless and personalized 2-minute podcast script for a user named {username}, based on these articles. "
@@ -730,7 +610,6 @@ async def generate_podcast_script(articles, summary_style, username):
             f" End on an uplifting note, urging {username} to stay curious and motivated.\n"
             f"Ensure the podcast fits within 2 minutes (~300 words), sounds like it’s delivered by a charismatic and lively host."
         )
-
         # OpenAI API call using the updated syntax
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo", 
@@ -741,19 +620,16 @@ async def generate_podcast_script(articles, summary_style, username):
             max_tokens=300,
             temperature=0.7
         )
-
         podcast_text = response.choices[0].message.content.strip()
         #print("Generated Podcast Script:", podcast_text)
         return podcast_text
     except Exception as e:
         print("Error during podcast script generation:", e)
         raise HTTPException(status_code=500, detail="An error occurred while generating the podcast script.")
-
 async def generate_podcast_audio(script):
     try:
         timestamp = str(int(time.time()))
         podcast_audio_path = os.path.join(audio_directory, f"podcast_audio_{timestamp}.mp3")
-
         # OpenAI API for text-to-speech (TTS)
         response = openai.audio.speech.create(
             model="tts-1",
@@ -761,83 +637,64 @@ async def generate_podcast_audio(script):
             input=script
         )
         print("TTS Response:", response)
-
         with open(podcast_audio_path, "wb") as f:
             f.write(response.content)
-
         print(f"Generated audio saved at: {podcast_audio_path}")
         return podcast_audio_path
     except Exception as e:
         print("Error during TTS conversion:", e)
         raise HTTPException(status_code=500, detail="An error occurred while converting text to speech.")
-
 async def add_intro_outro_music(audio_path, music_path, username):
     try:
         audio_directory = "src/audio"
         os.makedirs(audio_directory, exist_ok=True)
-
         if audio_path.endswith(".mp3"):
             wav_audio_path = os.path.join(audio_directory, f"{username}_podcast_audio.wav")
             AudioSegment.from_file(audio_path, format="mp3").export(wav_audio_path, format="wav")
             audio_path = wav_audio_path
-
         music_file_path = os.path.join(audio_directory, music_path)
         podcast_audio = AudioSegment.from_file(audio_path, format="wav")
         background_music = AudioSegment.from_file(music_file_path, format="wav")
-
         intro_music = background_music[:10000].fade_in(3000) - 20
         outro_music = background_music[:10000].fade_out(3000) - 20
-
         combined_audio = intro_music + podcast_audio.fade_in(3000).fade_out(3000) + outro_music
         final_audio_path = os.path.join(audio_directory, f"{username}_final_podcast_audio.wav")
         combined_audio.export(final_audio_path, format="wav")
-
         # Return the relative URL for the generated file
         return f"/audio/{username}_final_podcast_audio.wav"
     except Exception as e:
         print("Error adding intro/outro music:", e)
         raise HTTPException(status_code=500, detail="Error adding intro/outro music.")
-
 @fast_app.get("/podcast_script/{username}")
 async def create_podcast_script(username: str):
     try:
         audio_dir = os.path.join("src", "audio")
         final_audio_file = os.path.join(audio_dir, f"{username}_final_podcast_audio.wav")
-
         # Check if the final audio file already exists
         if os.path.exists(final_audio_file):
             audio_url = f"/audio/{username}_final_podcast_audio.wav"
             print(audio_url)
             return JSONResponse(content={"audio_url": audio_url})
-
         # Fetch user preferences (simulate database calls)
         user = users_collection.find_one({"username": username})
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
-
         user_news = news_articles_collection.find_one({"username": username})
         if not user_news or not user_news.get("articles"):
             raise HTTPException(status_code=404, detail="No articles found for this user.")
-
         articles = user_news["articles"]
         preferences = user.get("preferences", {})
         summary_style = preferences.get("summaryStyle", "brief")
-
         # Generate podcast script asynchronously and wait for it to complete
         podcast_script = await generate_podcast_script(articles, summary_style, username)
-
         # Generate audio for the podcast script asynchronously and wait for it to complete
         audio_path = await generate_podcast_audio(podcast_script)
-
         # Add intro and outro music asynchronously and wait for it to complete
         final_audio_path = await add_intro_outro_music(audio_path, "podcast_intro.wav", username)
-
         # Ensure the final path is a relative URL for the response
         audio_url = final_audio_path
-
         # Return only the audio URL
         return JSONResponse(content={"audio_url": audio_url})
-
     except HTTPException as e:
         print(f"Error in podcast script endpoint: {e.detail}")
         return JSONResponse(content={"error": e.detail}, status_code=e.status_code)
@@ -858,7 +715,6 @@ async def update_user_points(username: str, points: int):
         {"$set": {"points": new_points}}
     )
     return {"message": f"Points updated. New total: {new_points}"}
-
 # New endpoint to fetch current points
 @fast_app.get("/points/{username}")
 async def get_user_points(username: str):
@@ -866,27 +722,21 @@ async def get_user_points(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
     return {"username": username, "points": user["points"]}
-
 @fast_app.get("/streak/{username}")
 async def get_streak(username: str):
     user = users_collection.find_one({"username": username})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"streak": user.get("streak", 0)}
-
 REACT_APP_FRONTEND_URL = os.getenv("REACT_APP_FRONTEND_URL", "http://localhost:3000")  # default to localhost if not set
 PORT = int(os.getenv("PORT", 8000))
-
-fast_app = FastAPI()
-
 fast_app.add_middleware(
     CORSMiddleware,
-    allow_origins=[REACT_APP_FRONTEND_URL],  
+    allow_origins=[REACT_APP_FRONTEND_URL],  # Adjust if your frontend is hosted elsewhere
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(fast_app, host="0.0.0.0", port=PORT)

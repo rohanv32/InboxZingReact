@@ -9,3 +9,4 @@ openai
 pydub
 groq
 sendgrid
+secrets
