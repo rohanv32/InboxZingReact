@@ -725,7 +725,7 @@ async def get_user_points(username: str):
     return {"username": username, "points": user["points"]}
 
 
-@fast_app.get("/news/sources")
+@fast_app.get("/news_sources")
 async def fetch_news_sources():
     """
     Fetch and process news sources grouped by country and category.
