@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  
+import { useNavigate } from 'react-router-dom';  // Use useNavigate instead of useHistory
 
 function DeleteUser({ onDelete, username }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  
+  const navigate = useNavigate();  // useNavigate hook for redirection
 
-  // Function to create the delete button click for deleting the user
+  // Function to handle the delete button click and trigger the API request
   const handleDelete = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}`, {
+      const response = await fetch(`/user/${username}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -23,16 +23,16 @@ function DeleteUser({ onDelete, username }) {
         throw new Error('Failed to delete user');
       }
 
-      // after delete is processed
+      // Assuming onDelete is a function to handle the state after successful deletion
       onDelete();
 
-      // clear session and log the user out
-     
-      localStorage.removeItem('authToken');  
-      sessionStorage.removeItem('authToken'); 
+      // Log the user out by clearing session or localStorage or cookies
+      // Clear user session or authentication tokens here
+      localStorage.removeItem('authToken');  // Example: removing auth token from localStorage
+      sessionStorage.removeItem('authToken'); // Example: removing auth token from sessionStorage
 
-      // Redirect to login after account deletion
-      navigate('/login'); 
+      // Redirect to login or home page after account deletion
+      navigate('/'); // Using navigate instead of history.push
 
     } catch (err) {
       setError('An error occurred while deleting your account. Please try again.');
@@ -40,6 +40,11 @@ function DeleteUser({ onDelete, username }) {
       setLoading(false);
     }
   };
+
+  const handleGoBack = () => {
+    navigate('/newsfeed');
+  };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -58,7 +63,7 @@ function DeleteUser({ onDelete, username }) {
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
         
-        {/* User presses on Delete button to initiates handleDelete */}
+        {/* User presses the Delete button to trigger handleDelete */}
         <button 
           onClick={handleDelete} 
           className="w-full flex justify-center rounded-sm bg-[#D5C3C6] py-3 text-black"
@@ -67,11 +72,13 @@ function DeleteUser({ onDelete, username }) {
           {loading ? 'Deleting...' : 'Delete Account'}
         </button>
         
-        {/* Link to renavigate to settings page */}
         <div className="mt-4 text-center text-sm">
-          <a href="/settings" className="text-black underline">
+          <button 
+            onClick={handleGoBack} 
+            className="text-black underline"
+          >
             Go Back
-          </a>
+          </button>
         </div>
       </div>
     </div>
