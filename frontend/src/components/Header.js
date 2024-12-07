@@ -1,30 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useUserContext } from './UserContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defining the header initially with the tabs available
+const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const { points } = useUserContext();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const navigation = isLoggedIn
-    ? [
-        { name: 'News Feed', onClick: () => onTabChange('NewsFeed') },
-        { name: 'Preferences', onClick: () => onTabChange('Preferences') },
-        { name: 'Delete Account', onClick: () => onTabChange('DeleteUser') },
-        { name: 'Profile', onClick: () => onTabChange('Profile') },
-        { name: 'Logout', onClick: onLogout },
-      ]
-    : [];
+  ? [
+      { name: 'News Feed', path: '/newsfeed' },
+      { name: 'Preferences', path: '/preferences' },
+      { name: 'Delete Account', path: '/deleteuser' },
+      { name: 'Profile', path: '/profile' },
+      { name: 'Podcast', path: '/podcast' },
+      { name: 'Logout', onClick: onLogout },
+    ]
+  : [];
 
-  return (                                                              //Return with styles and overall layout, including clicking on the logo
+  // Handle scroll state
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50); // Adjust the threshold as needed
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleNavigation = (path) => {
+    if (path) {
+      navigate(path);
+    }
+  };
+
+  return (
     <div className="relative isolate bg-white">
-      <header className="fixed inset-x-0 top-0 z-50">
-        <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">   
-          <div className="flex lg:flex-1">                            
-            <button onClick={onLogoClick} className="-m-1.5 p-1.5">     
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'bg-white/80 backdrop-blur-lg shadow-md' : 'bg-transparent'
+        }`}
+      >
+        <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
+          {/* Logo Section */}
+          <div className="flex lg:flex-1 items-center">
+            <button onClick={onLogoClick} className="-m-1.5 p-1.5">
               <span className="sr-only">Inbox Zing</span>
               <h1 className="text-xl font-bold">Inbox Zing</h1>
             </button>
+            {/* Points Display */}
+            {isLoggedIn && (
+              <span className="ml-4 text-sm font-semibold text-gray-700">
+                Points: <span className="text-gray-900">{points}</span>
+              </span>
+            )}
           </div>
+
+          {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -35,14 +75,30 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defi
               <Bars3Icon aria-hidden="true" className="h-6 w-6" />
             </button>
           </div>
+
+          {/* Navigation for Large Screens */}
           <div className="hidden lg:flex lg:gap-x-12">
-            {navigation.map((item) => (
-              <button key={item.name} onClick={item.onClick} className="text-sm font-semibold text-gray-900">
-                {item.name}
-              </button>
-            ))}
-          </div>
+          {navigation.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => {
+                if (item.onClick) {
+                  item.onClick();  // Call the logout function directly here
+                } else {
+                  handleNavigation(item.path);
+                }
+              }}
+              className={`text-sm font-semibold text-gray-900 ${
+                location.pathname === item.path ? 'text-blue-500' : ''
+              }`}
+            >
+              {item.name}
+            </button>
+          ))}
+        </div>
         </nav>
+
+        {/* Mobile Menu */}
         <Dialog open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} className="lg:hidden">
           <div className="fixed inset-0 z-50" />
           <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
@@ -66,8 +122,10 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defi
                   {navigation.map((item) => (
                     <button
                       key={item.name}
-                      onClick={item.onClick}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50"
+                      onClick={() => handleNavigation(item.path)}
+                      className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50 ${
+                        location.pathname === item.path ? 'text-blue-500' : ''
+                      }`}
                     >
                       {item.name}
                     </button>
@@ -84,7 +142,7 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {  //Defi
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
         style={{
-          pointerEvents: 'none', // Prevents the background from blocking clicks
+          pointerEvents: 'none',
         }}
       >
         <div
