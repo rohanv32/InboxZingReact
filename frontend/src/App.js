@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
@@ -8,10 +9,13 @@ import DeleteUser from './components/DeleteUser';
 import { UserProvider, useUserContext } from './components/UserContext';
 import Profile from './components/Profile'; 
 import Header from './components/Header'; 
+import Podcast from './components/Podcast'
 import { useNavigate } from 'react-router-dom';
+import EarnPoint from './components/EarnPoint';
+import Swal from 'sweetalert2';
 
 function App() {
-  const context = useUserContext();  
+  const context = useUserContext();  // Get context from the UserProvider
   const username = context ? context.username : '';
   const setUsername = context ? context.setUsername : () => {};
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -20,13 +24,9 @@ function App() {
   const [newsArticles, setNewsArticles] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log('Backend URL:', process.env.REACT_APP_BACKEND_URL);
-  }, []);
-
   const handleLogin = async (credentials) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -41,98 +41,126 @@ function App() {
         if (data.username) {
           console.log("Setting username:", data.username);
           setIsLoggedIn(true);
-          // this helps in setting the username if sucessfully logged in
-          // else login fail error 
-          setUsername(data.username); 
+          setUsername(data.username);  // Only set username after successful login
           console.log("Username set in context:", data.username);
           setActiveTab('NewsFeed');
           navigate('/newsfeed');
         } else {
-          alert('Login failed: No username in response');
+          Swal.fire({
+            icon: "error",
+            title: "Login Error",
+            text: "Login failed. No username in response."
+          });
         }
       } else {
         const error = await response.json();
-        alert(error.detail || 'An error occurred during login');
+        Swal.fire({
+          icon: "error",
+          title: "Login Error",
+          text: "An error occurred during login."
+        });
+
       }
     } catch (error) {
       console.error('Error logging in:', error);  
-      alert('An error occurred while logging in');
+      Swal.fire({
+        icon: "error",
+        title: "Login Error",
+        text: error.message,
+        footer: "An error occurred while logging in."
+      });
     }
   };
-  // make sure to reset username on log out
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     setIsLoggedIn(false);
-    setUsername(null); 
+    setUsername(null); // Reset username on logout
     setActiveTab('Home');
     navigate('/');
   };
 
   const handleDeleteAccount = async () => {
-      alert("User deleted!");
+      Swal.fire({
+        icon: "warning",
+        title: "User deleted!",
+      });
       handleLogout();
   };
-  // signing up the user function
+
   const handleSignUp = async (userData) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signup`, {
+      // Step 1: Sign up the user
+      const response = await fetch('/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
   
       if (response.ok) {
-        // if they alrady have a username and password previously
-        const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
+        // Step 2: Log in the user automatically
+        const loginResponse = await fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: userData.username,
-            password: userData.password,  
+            password: userData.password,  // Assuming you have the password in userData
           }),
         });
+  
         if (loginResponse.ok) {
           const loginData = await loginResponse.json();
+          // Assuming login returns a token or sets a session cookie
           localStorage.setItem('authToken', loginData.token);
   
-          // logged in state updated to match current
-          setIsLoggedIn(true);  
-          setUsername(userData.username); 
-          setActiveTab('Preferences');  
+          // Update logged-in state
+          setIsLoggedIn(true);  // Ensure the user is considered logged in
+          setUsername(userData.username);  // Ensure username is set
+          setActiveTab('Preferences');  // Redirect to preferences after signup
           navigate('/preferences');
         } else {
           const errorData = await loginResponse.json();
-          alert(`Login failed: ${errorData.detail || 'Unknown error'}`);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Login failed: ${errorData.detail || 'Unknown error'}",
+          });
         }
       } else {
         const errorData = await response.json();
-        alert(`Signup failed: ${errorData.detail || 'Unknown error'}`);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Signup failed: ${errorData.detail || 'Unknown error'}",
+        });
       }
     } catch (error) {
       console.error('Error during signup or login:', error);
-      alert('An error occurred during signup');
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "An error occurred during signup.",
+      });
     }
 };
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      setIsLoggedIn(true);  
-  
+      setIsLoggedIn(true);  // User is logged in if token exists
+      // You can also fetch the user data here if needed (e.g., username)
       const fetchUserData = async () => {
         try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user`, {
+          const response = await fetch('/user', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
           });
           if (response.ok) {
             const userData = await response.json();
             setUsername(userData.username);
-            // default redirection into news feed if data fetched 
-            // if not fetched redirect to home
-            setActiveTab('NewsFeed'); 
+            setActiveTab('NewsFeed');  // Redirect to the NewsFeed tab after login
           } else {
-            setActiveTab('Home'); 
+            setActiveTab('Home');  // Default to Home if user data isn't fetched
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -141,8 +169,9 @@ function App() {
       fetchUserData();
     } else {
       setActiveTab('Home');
+      navigate('/');
     }
-  }, []); 
+  }, []); // Run only once when component mounts
 
   useEffect(() => {
     console.log("Active Tab:", activeTab);
@@ -151,7 +180,7 @@ function App() {
   }, [activeTab, isLoggedIn, isRedirectedFromSignUp]);
 
   const handleUpdateComplete = () => {
-    setActiveTab('NewsFeed');
+    navigate('/newsfeed');
   };
 
   const handleTabChange = (tab) => {
@@ -159,71 +188,67 @@ function App() {
   };
 
   const handleNavigateToSignUp = () => {
-    setActiveTab('SignUp');
+    navigate('/signup');
   };
 
   const handleNavigateToLogin = () => {
-    setActiveTab('Login');
+    navigate('/login');
   };
 
   const handleNavigateToPreferences = () => {
-    setActiveTab('Preferences');
+    navigate('/preferences');
   };
 
   const handleLogoClick = () => {
     if (isLoggedIn) {
-      setActiveTab('NewsFeed');
+      navigate('/newsfeed');
     } else {
-      setActiveTab('Home');
+      navigate('/');
     }
   };
 
   useEffect(() => {
-    // checking the login status
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/status`);
-        const data = await response.json();
-  
-        if (data.isLoggedIn && data.username) {
-          setIsLoggedIn(true);
-          setUsername(data.username); 
-          setActiveTab('NewsFeed');
-        } else {
-          setActiveTab('Home');
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsLoggedIn(true);
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch('/user', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUsername(userData.username);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
-      } catch (error) {
-        console.error('Error checking login status:', error);
-      }
-    };
-  
-    // check current login status
-    checkLoginStatus();
-  }, []); // 
+      };
+      fetchUserData();
+    }
+  }, []);
 
   return (
-    <UserProvider> {/* makes sure UserContext is available */}
+    <UserProvider> {/* Ensure UserContext is available */}
        <Header
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
         onTabChange={handleTabChange}
-        onLogoClick={() => setActiveTab('Home')}
+        onLogoClick={handleLogoClick}
       />
-      <div className="App">
-        <div className="content">
-          {activeTab === 'Home' && !isLoggedIn && <Home onTabChange={handleTabChange} />}
-          {activeTab === 'SignUp' && !isLoggedIn && <SignUp onSignUp={handleSignUp} onNavigateToLogin={handleNavigateToLogin} />}
-          {activeTab === 'Login' && !isLoggedIn && <Login onLogin={handleLogin} onNavigateToSignUp={handleNavigateToSignUp} />}
-          {activeTab === 'Preferences' && (isLoggedIn || isRedirectedFromSignUp) && (
-            <Preferences onUpdateComplete={handleUpdateComplete} username={username}/>
-          )}
-          {activeTab === 'NewsFeed' && (isLoggedIn || isRedirectedFromSignUp) && (<NewsFeed newsArticles={newsArticles} username={username}/>)}
-          {activeTab === 'DeleteUser' && (isLoggedIn || isRedirectedFromSignUp) && (<DeleteUser onDelete={handleDeleteAccount} username={username} />)}
-          {activeTab === 'Profile' && isLoggedIn && (
-            <Profile onNavigatetoPreferences={handleNavigateToPreferences} username={username} />
-          )}
-        </div>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home onTabChange={handleTabChange}/>} />
+        <Route path="/signup" element={!isLoggedIn ? <SignUp onSignUp={handleSignUp} onNavigateToLogin={handleNavigateToLogin} /> : <Navigate to="/preferences" />} />
+        <Route path="/login" element={!isLoggedIn ? <Login onLogin={handleLogin} onNavigateToSignUp={handleNavigateToSignUp}/> : <Navigate to="/newsfeed" />} />
+        <Route path="/preferences" element={(isLoggedIn || isRedirectedFromSignUp) ? <Preferences onUpdateComplete={handleUpdateComplete} username={username} /> : <Navigate to="/login" />} />
+        <Route path="/newsfeed" element={isLoggedIn ? <NewsFeed newsArticles={newsArticles} username={username} /> : <Navigate to="/login" />} />
+        <Route path="/deleteuser" element={isLoggedIn ? <DeleteUser onDelete={handleDeleteAccount} username={username} /> : <Navigate to="/" />} />
+        <Route path="/profile" element={isLoggedIn ? <Profile onNavigatetoPreferences={handleNavigateToPreferences} username={username} /> : <Navigate to="/login" />} />
+        <Route path="/podcast" element={isLoggedIn ? <Podcast username={username} /> : <Navigate to="/login" />} />
+        <Route path="/earnpoint" element={(isLoggedIn || isRedirectedFromSignUp) ? <EarnPoint /> : <Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </UserProvider>
   );
 }
