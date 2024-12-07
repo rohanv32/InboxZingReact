@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UserContext } from './UserContext';
+import Swal from 'sweetalert2';
 
 function Login({ onLogin, onNavigateToSignUp }) {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const { setPoints, setStreak } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -12,7 +16,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
     console.log("Form Data: ", formData);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -24,29 +28,83 @@ function Login({ onLogin, onNavigateToSignUp }) {
       if (response.ok) {
         const data = await response.json();
         console.log("Login success response data:", data);
-        alert(data.message);
+        Swal.fire({
+          title: "Welcome back!",
+          text: data.message,
+          icon: "success"
+        });
         await onLogin(formData);
 
-        // Fetch news for the logged-in user
-        try {
-          const newsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${formData.username}`);
-          if (newsResponse.ok) {
-            const newsData = await newsResponse.json();
-            console.log("Fetched news data:", newsData); // Log the fetched news data
+        // Fetch the current points from the server
+        const userPointsResponse = await fetch(`/points/${formData.username}`);
+        if (userPointsResponse.ok) {
+          const userPointsData = await userPointsResponse.json();
+          console.log("Fetched user points from server:", userPointsData);
+
+          // Calculate the new points (add login gift points)
+          const updatedPoints = userPointsData.points + 10;
+
+          // Update points on the backend
+          const pointsUpdateResponse = await fetch(`/points/update?username=${formData.username}&points=10`, {
+            method: 'POST',
+          });
+          if (pointsUpdateResponse.ok) {
+            console.log(`10 points added for login. Updated total: ${updatedPoints}`);
+            setPoints(updatedPoints); // Update points in context
           } else {
-            console.error("Failed to fetch news articles.");
+            console.error("Failed to update points on the server.");
           }
-        } catch (newsErr) {
-          console.error("An error occurred while fetching news:", newsErr);
+        } else {
+          console.error("Failed to fetch user points from the server.");
         }
+
+        try {
+          const streakResponse = await fetch(`/streak/${formData.username}`);
+          if (streakResponse.ok) {
+            const streakData = await streakResponse.json();
+            console.log("Fetched streak data:", streakData);
+
+            // Update streak in context
+            setStreak(streakData.streak);
+            console.log("New streak data:", streakData);
+          } else {
+            console.error("Failed to fetch streak data.");
+          }
+
+        } catch (streakErr) {
+          console.error("An error occurred while fetching streak:", streakErr);
+        }
+
+        // Fetch news for the logged-in user
+        /* try {
+            const newsResponse = await fetch(`/news/${formData.username}`);
+            if (newsResponse.ok) {
+                const newsData = await newsResponse.json();
+                console.log("Fetched news data:", newsData); // Log the fetched news data
+            } else {
+                console.error("Failed to fetch news articles.");
+            }
+        } catch (newsErr) {
+            console.error("An error occurred while fetching news:", newsErr);
+        } */
       } else {
         const error = await response.json();
         console.error("Login error response:", error);
-        alert(error.detail);
+        Swal.fire({
+          icon: "error",
+          title: "Login Error",
+          text: error.message,
+          footer: "Please try again with a different username or sign up."
+        });
       }
     } catch (err) {
       console.error("An error occurred:", err);
-      alert("An error occurred during login. Please try again later.");
+      Swal.fire({
+        icon: "error",
+        title: "Login Error",
+        text: err.message,
+        footer: "An error occurred during login. Please try again later."
+      });
     }
   };
 
@@ -63,7 +121,13 @@ function Login({ onLogin, onNavigateToSignUp }) {
       <ForgotPassword
         email={formData.username}
         onEmailChange={(e) => setFormData({ ...formData, username: e.target.value })}
-        onSubmit={() => alert("Verification email sent!")}
+        onSubmit={() => Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Verification email sent!",
+          showConfirmButton: false,
+          timer: 1500
+        })}
         notification={"Please check your email for further instructions."}
         onBack={handleBackToLogin}
       />
@@ -76,7 +140,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
         <h1 className="text-center text-3xl font-bold mb-6">
           THE INBOX ZING!
         </h1>
-        
+
         <h2 className="text-center text-xl mb-6">
           Welcome back
         </h2>
@@ -131,9 +195,9 @@ function Login({ onLogin, onNavigateToSignUp }) {
 
           <div className="text-center">
             <span>Don't have an account? </span>
-            <button 
-              type="button" 
-              onClick={onNavigateToSignUp} 
+            <button
+              type="button"
+              onClick={() => navigate('/signup')}
               className="text-black underline"
             >
               Sign up
@@ -146,7 +210,6 @@ function Login({ onLogin, onNavigateToSignUp }) {
 }
 
 function ForgotPassword({ email, onEmailChange, onSubmit, notification, onBack }) {
-
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
