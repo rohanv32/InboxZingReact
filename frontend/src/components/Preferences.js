@@ -78,35 +78,23 @@ function Preferences({ onUpdateComplete, username }) {
   };
   // Fetch data from API on mount
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await axios.get(
-          `https://newsapi.org/v2/top-headlines/sources?apiKey=${NEWS_API_KEY}`
-        );
-        const sources = response.data.sources;
-  
-        // Process the data
-        const countryData = {};
-        sources.forEach((source) => {
-          const { country, category, id, name } = source;
-          if (!countryData[country]) countryData[country] = {};
-          if (!countryData[country][category]) countryData[country][category] = [];
-          countryData[country][category].push({ id, name });
-        });
-  
-        setData(countryData);
-        setCountries(Object.keys(countryData));
-        setLocalPreferences((prev) => ({
-          ...prev,
-          country: null,
-        }));
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Failed to fetch news sources. Please try again later.');
+      async function fetchData() {
+          try {
+              const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/news_sources`);
+              const { data, countries } = response.data;
+              setData(data);
+              setCountries(countries);
+              setLocalPreferences((prev) => ({
+                  ...prev,
+                  country: null,
+              }));
+          } catch (error) {
+              console.error('Error fetching data:', error);
+              setError('Failed to fetch news sources. Please try again later.');
+          }
       }
-    }
-  
-    fetchData();
+
+      fetchData();
   }, []);
 
 const handleSelection = (field, value) => {
