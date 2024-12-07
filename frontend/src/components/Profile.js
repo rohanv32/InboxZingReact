@@ -21,18 +21,18 @@ function Profile({ username, onNavigatetoPreferences }) {
     const fetchData = async () => {
       try {
         // Fetch preferences
-        const preferencesResponse = await fetch(`/user/${username}`);
+        const preferencesResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}`);
         if (!preferencesResponse.ok) throw new Error("Unable to fetch preferences");
         const preferencesData = await preferencesResponse.json();
         setPreferences(preferencesData.preferences);
 
         // Fetch statistics
-        const statisticsResponse = await fetch(`/news/${username}/statistics`);
+        const statisticsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${username}/statistics`);
         if (!statisticsResponse.ok) throw new Error("Unable to fetch statistics");
         const statisticsData = await statisticsResponse.json();
         setStatistics(statisticsData);
 
-        const streakResponse = await fetch(`/streak/${username}`);
+        const streakResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/streak/${username}`);
         if (!streakResponse.ok) throw new Error("Unable to fetch streak");
         const streakData = await streakResponse.json();
         setStreak(streakData.streak);  // Set the streak value
@@ -74,7 +74,7 @@ function Profile({ username, onNavigatetoPreferences }) {
     }
 
     try {
-      const response = await fetch(`/user/${username}/password`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user/${username}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

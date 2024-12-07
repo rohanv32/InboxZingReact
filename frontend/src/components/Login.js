@@ -16,7 +16,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
     console.log("Form Data: ", formData);
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -36,7 +36,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
         await onLogin(formData);
 
         // Fetch the current points from the server
-        const userPointsResponse = await fetch(`/points/${formData.username}`);
+        const userPointsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/${formData.username}`);
         if (userPointsResponse.ok) {
           const userPointsData = await userPointsResponse.json();
           console.log("Fetched user points from server:", userPointsData);
@@ -45,7 +45,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
           const updatedPoints = userPointsData.points + 10;
 
           // Update points on the backend
-          const pointsUpdateResponse = await fetch(`/points/update?username=${formData.username}&points=10`, {
+          const pointsUpdateResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${formData.username}&points=10`, {
             method: 'POST',
           });
           if (pointsUpdateResponse.ok) {
@@ -59,7 +59,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
         }
 
         try {
-          const streakResponse = await fetch(`/streak/${formData.username}`);
+          const streakResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/streak/${formData.username}`);
           if (streakResponse.ok) {
             const streakData = await streakResponse.json();
             console.log("Fetched streak data:", streakData);

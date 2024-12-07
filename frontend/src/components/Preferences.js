@@ -194,7 +194,7 @@ const handleNext = async () => {
         return;
       }
       try {
-        await axios.put(`/preferences/${username}`, {
+        await axios.put(`${process.env.REACT_APP_BACKEND_URL}/preferences/${username}`, {
           country: localPreferences.country,
           category: localPreferences.category,
           sources: localPreferences.sources,

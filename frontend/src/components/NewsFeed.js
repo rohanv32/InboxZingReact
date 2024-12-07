@@ -25,7 +25,7 @@ function NewsFeed({ newsArticles, username }) {
 
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`/news/${username}`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${username}`);
         if (!response.ok) {
           throw new Error('Failed to fetch news articles');
         }
@@ -83,7 +83,7 @@ function NewsFeed({ newsArticles, username }) {
 
       // Update points on the backend
       try {
-        const response = await fetch(`/points/update?username=${username}&points=${earnedPoints}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${username}&points=${earnedPoints}`, {
           method: 'POST',
         });
 
@@ -99,7 +99,7 @@ function NewsFeed({ newsArticles, username }) {
 
       // Mark the article as read in the backend (along with reading time)
       try {
-        const response = await fetch(`/news/${username}/mark_as_read?article_url=${selectedArticle.url}&readingTime=${Math.round(readingTime)}`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${username}/mark_as_read?article_url=${selectedArticle.url}&readingTime=${Math.round(readingTime)}`, {
           method: 'PATCH',
         });
 

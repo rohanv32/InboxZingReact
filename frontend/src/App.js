@@ -26,7 +26,7 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await fetch('/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -91,7 +91,7 @@ function App() {
   const handleSignUp = async (userData) => {
     try {
       // Step 1: Sign up the user
-      const response = await fetch('/signup', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -99,7 +99,7 @@ function App() {
   
       if (response.ok) {
         // Step 2: Log in the user automatically
-        const loginResponse = await fetch('/login', {
+        const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -151,7 +151,7 @@ function App() {
       // You can also fetch the user data here if needed (e.g., username)
       const fetchUserData = async () => {
         try {
-          const response = await fetch('/user', {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
           });
@@ -213,7 +213,7 @@ function App() {
       setIsLoggedIn(true);
       const fetchUserData = async () => {
         try {
-          const response = await fetch('/user', {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` },
           });

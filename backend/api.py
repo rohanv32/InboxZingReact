@@ -874,9 +874,14 @@ async def get_streak(username: str):
         raise HTTPException(status_code=404, detail="User not found")
     return {"streak": user.get("streak", 0)}
 
+REACT_APP_FRONTEND_URL = os.getenv("REACT_APP_FRONTEND_URL", "http://localhost:3000")  # default to localhost if not set
+PORT = int(os.getenv("PORT", 8000))
+
+fast_app = FastAPI()
+
 fast_app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust if your frontend is hosted elsewhere
+    allow_origins=[REACT_APP_FRONTEND_URL],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -884,4 +889,4 @@ fast_app.add_middleware(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(fast_app, host="0.0.0.0", port=8000)
+    uvicorn.run(fast_app, host="0.0.0.0", port=PORT)

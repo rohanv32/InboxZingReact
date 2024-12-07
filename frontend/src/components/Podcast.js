@@ -11,7 +11,7 @@ const Podcast = ({ username }) => {
             setError(null);
 
             try {
-                const response = await fetch(`/podcast_script/${username}`);
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/podcast_script/${username}`);
                 if (!response.ok) {
                     throw new Error("Failed to generate podcast");
                 }

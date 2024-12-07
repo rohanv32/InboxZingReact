@@ -38,7 +38,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
 
     try {
       // Sign up API call
-      const response = await fetch('/signup', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
 
     try {
       // Verify confirmation code API call
-      const response = await fetch('/verify_confirmation', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/verify_confirmation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -107,7 +107,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
       setUsername(formData.username);
 
       // Call preferences API to set up default preferences
-      const preferencesResponse = await fetch(`/preferences/${formData.username}`, {
+      const preferencesResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/preferences/${formData.username}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -126,7 +126,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
       setPreferences(defaultPreferences);
 
       // Fetch news articles based on preferences
-      const newsResponse = await fetch(`/news/${formData.username}`);
+      const newsResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${formData.username}`);
       if (!newsResponse.ok) {
         throw new Error("Failed to fetch news articles.");
       }
