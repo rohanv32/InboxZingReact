@@ -724,6 +724,47 @@ async def get_user_points(username: str):
         raise HTTPException(status_code=404, detail="User not found.")
     return {"username": username, "points": user["points"]}
 
+
+@fast_app.get("/news/sources")
+async def fetch_news_sources():
+    """
+    Fetch and process news sources grouped by country and category.
+    """
+    if not NEWS_API_KEY:
+        raise HTTPException(status_code=500, detail="API key is not configured.")
+
+    try:
+        response = requests.get(
+            f"https://newsapi.org/v2/top-headlines/sources?apiKey={NEWS_API_KEY}"
+        )
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
+        sources_data = response.json().get("sources", [])
+
+        # Process data into a nested structure: country -> category -> sources
+        country_data = {}
+        for source in sources_data:
+            country = source.get("country")
+            category = source.get("category")
+            source_id = source.get("id")
+            source_name = source.get("name")
+
+            if not country or not category or not source_id or not source_name:
+                continue
+
+            if country not in country_data:
+                country_data[country] = {}
+            if category not in country_data[country]:
+                country_data[country][category] = []
+
+            country_data[country][category].append({"id": source_id, "name": source_name})
+
+        return {
+            "countries": list(country_data.keys()),
+            "data": country_data,
+        }
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
+
 @fast_app.get("/streak/{username}")
 async def get_streak(username: str):
     user = users_collection.find_one({"username": username})
