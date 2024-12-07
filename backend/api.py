@@ -715,6 +715,7 @@ async def update_user_points(username: str, points: int):
         {"$set": {"points": new_points}}
     )
     return {"message": f"Points updated. New total: {new_points}"}
+
 # New endpoint to fetch current points
 @fast_app.get("/points/{username}")
 async def get_user_points(username: str):
@@ -722,12 +723,14 @@ async def get_user_points(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
     return {"username": username, "points": user["points"]}
+
 @fast_app.get("/streak/{username}")
 async def get_streak(username: str):
     user = users_collection.find_one({"username": username})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"streak": user.get("streak", 0)}
+
 REACT_APP_FRONTEND_URL = os.getenv("REACT_APP_FRONTEND_URL", "http://localhost:3000")  # default to localhost if not set
 PORT = int(os.getenv("PORT", 8000))
 fast_app.add_middleware(
