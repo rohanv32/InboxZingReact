@@ -11,7 +11,6 @@ import Profile from './components/Profile';
 import Header from './components/Header'; 
 import Podcast from './components/Podcast'
 import { useNavigate } from 'react-router-dom';
-import EarnPoint from './components/EarnPoint';
 import Swal from 'sweetalert2';
 
 function App() {
@@ -246,7 +245,6 @@ function App() {
         <Route path="/deleteuser" element={isLoggedIn ? <DeleteUser onDelete={handleDeleteAccount} username={username} /> : <Navigate to="/" />} />
         <Route path="/profile" element={isLoggedIn ? <Profile onNavigatetoPreferences={handleNavigateToPreferences} username={username} /> : <Navigate to="/login" />} />
         <Route path="/podcast" element={isLoggedIn ? <Podcast username={username} /> : <Navigate to="/login" />} />
-        <Route path="/earnpoint" element={(isLoggedIn || isRedirectedFromSignUp) ? <EarnPoint /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </UserProvider>
