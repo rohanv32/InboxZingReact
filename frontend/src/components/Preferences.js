@@ -1,222 +1,391 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useUserActions } from './UserContext';
-import { UserContext } from './UserContext';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 
-let NEWS_API_URL = "https://newsapi.org/v2/top-headlines/sources";
+const NEWS_API_KEY = process.env.REACT_APP_NEWS_API_KEY;
 
 function Preferences({ onUpdateComplete, username }) {
   const { preferences, setPreferences } = useContext(UserContext);
   const [step, setStep] = useState(1);
-  const [localPreferences, setLocalPreferences] = useState(preferences);
+  const [localPreferences, setLocalPreferences] = useState(preferences || {});
   const [error, setError] = useState('');
+  const [data, setData] = useState({});
+  const [countries, setCountries] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [sources, setSources] = useState([]);
 
-  // Predefined options based on your logic
-  const COUNTRY_OPTIONS = [
-    { code: 'us', name: 'United States' },
-    { code: 'ca', name: 'Canada' },
-    { code: 'gb', name: 'United Kingdom' },
-    { code: 'fr', name: 'France' }
-  ];
+  const summaryStyles = ['Detailed', 'Brief', 'ELI5', 'Humorous', 'Storytelling', 'Poetic'];
+  const frequencies = [1, 3, 6, 12, 24, 48, 72, 96];
+  const countryCodeMap = {
+    ae: 'United Arab Emirates',
+    ar: 'Argentina',
+    at: 'Austria',
+    au: 'Australia',
+    be: 'Belgium',
+    bg: 'Bulgaria',
+    br: 'Brazil',
+    ca: 'Canada',
+    ch: 'Switzerland',
+    cn: 'China',
+    co: 'Colombia',
+    cu: 'Cuba',
+    cz: 'Czech Republic',
+    de: 'Germany',
+    es: 'Spain',
+    eg: 'Egypt',
+    fr: 'France',
+    gb: 'United Kingdom',
+    gr: 'Greece',
+    hk: 'Hong Kong',
+    hu: 'Hungary',
+    id: 'Indonesia',
+    ie: 'Ireland',
+    il: 'Israel',
+    in: 'India',
+    is: 'Iceland',
+    it: 'Italy',
+    jp: 'Japan',
+    kr: 'South Korea',
+    lt: 'Lithuania',
+    lv: 'Latvia',
+    ma: 'Morocco',
+    mx: 'Mexico',
+    my: 'Malaysia',
+    ng: 'Nigeria',
+    nl: 'Netherlands',
+    no: 'Norway',
+    nz: 'New Zealand',
+    ph: 'Philippines',
+    pk: 'Pakistan',
+    pl: 'Poland',
+    pt: 'Portugal',
+    ro: 'Romania',
+    rs: 'Serbia',
+    ru: 'Russia',
+    sa: 'Saudi Arabia',
+    se: 'Sweden',
+    sg: 'Singapore',
+    si: 'Slovenia',
+    sk: 'Slovakia',
+    th: 'Thailand',
+    tr: 'Turkey',
+    tw: 'Taiwan',
+    ua: 'Ukraine',
+    us: 'United States',
+    ve: 'Venezuela',
+    za: 'South Africa',
+    zh: 'China'
+  };
+  // Fetch data from API on mount
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get(
+          `https://newsapi.org/v2/top-headlines/sources?apiKey=${NEWS_API_KEY}`
+        );
+        const sources = response.data.sources;
+  
+        // Process the data
+        const countryData = {};
+        sources.forEach((source) => {
+          const { country, category, id, name } = source;
+          if (!countryData[country]) countryData[country] = {};
+          if (!countryData[country][category]) countryData[country][category] = [];
+          countryData[country][category].push({ id, name });
+        });
+  
+        setData(countryData);
+        setCountries(Object.keys(countryData));
+        setLocalPreferences((prev) => ({
+          ...prev,
+          country: null,
+        }));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch news sources. Please try again later.');
+      }
+    }
+  
+    fetchData();
+  }, []);
 
-  const CATEGORY_OPTIONS = ['general', 'business', 'sports', 'entertainment', 'technology', 'health'];
+const handleSelection = (field, value) => {
+  setLocalPreferences((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+  setError('');
 
-  const LANGUAGE_OPTIONS = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'French' }
-  ];
-
-  const SUMMARY_STYLE_OPTIONS = ['brief', 'detailed', 'humorous', 'eli5'];
-
-  const handleSelection = (field, value) => {
+  if (field === 'country') {
+    const countryCategories = Object.keys(data[value] || {});
+    setCategories(countryCategories);
+    setSources([]);
     setLocalPreferences((prev) => ({
       ...prev,
-      [field]: value
+      category: null,
+      sources: '',
     }));
-    setError('');
-  };
+  }
 
-  const handleNext = async () => {
-    switch (step) {
-      case 1:
-        if (!localPreferences.country) {
-          setError('Please select a country');
-          return;
-        }
-        break;
-      case 2:
-        if (!localPreferences.category) {
-          setError('Please select a category');
-          return;
-        }
-        break;
-      case 3:
-        if (!localPreferences.language) {
-          setError('Please select a language');
-          return;
-        }
-        break;
-      case 4:
-        if (!localPreferences.summaryStyle || !localPreferences.frequency) {
-          setError('Please complete all preferences');
-          return;
-        }
+  if (field === 'category') {
+    setSources(data[localPreferences.country]?.[value] || []);
+    setLocalPreferences((prev) => ({
+      ...prev,
+      sources: '',
+    }));
+  }
 
-        try {
-          // Update preferences in the database
-          await axios.put(`${process.env.REACT_APP_BACKEND_URL}/preferences/${username}`, {
-            country: localPreferences.country,
-            category: localPreferences.category,
-            language: localPreferences.language,
-            summaryStyle: localPreferences.summaryStyle,
-            frequency: localPreferences.frequency
-          });
+  if (field === 'source') {
+    let newSources = localPreferences.sources || '';
+    const selectedSources = newSources.split(',').filter(Boolean);
 
-          setPreferences(localPreferences);
-          onUpdateComplete();
-        } catch (error) {
-          console.error("Error updating preferences:", error);
-          setError("Failed to update preferences. Please try again.");
-        }
+    if (!selectedSources.includes(value)) {
+      if (selectedSources.length < 20) {
+        selectedSources.push(value);
+        newSources = selectedSources.join(',');
+        setError('');
+      } else {
+        setError('You can only select up to 20 sources.');
         return;
+      }
+    } else {
+      const index = selectedSources.indexOf(value);
+      if (index > -1) {
+        selectedSources.splice(index, 1);
+      }
+      newSources = selectedSources.join(',');
     }
-    setStep(step + 1);
-    setError('');
-  };
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <>
-            <h2 className="text-xl text-center mb-8">Select your country</h2>
-            <div className="space-y-3">
-              {COUNTRY_OPTIONS.map((country) => (
-                <button
-                  key={country.code}
-                  onClick={() => handleSelection('country', country.code)}
-                  className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                    localPreferences.country === country.code ? 'border-2 border-[#D5C3C6]' : ''
-                  }`}
-                >
-                  <div className={`w-4 h-4 rounded-full mr-4 ${
-                    localPreferences.country === country.code ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                  }`}></div>
-                  {country.name}
-                </button>
-              ))}
-            </div>
-          </>
-        );
+    setLocalPreferences((prev) => ({
+      ...prev,
+      sources: newSources,
+    }));
+  }
+};
 
-      case 2:
-        return (
-          <>
-            <h2 className="text-xl text-center mb-8">Select a news category</h2>
-            <div className="space-y-3">
-              {CATEGORY_OPTIONS.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => handleSelection('category', category)}
-                  className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                    localPreferences.category === category ? 'border-2 border-[#D5C3C6]' : ''
+const handleNext = async () => {
+  switch (step) {
+    case 1:
+      if (!localPreferences.country) {
+        setError('Please select a country');
+        return;
+      }
+      break;
+    case 2:
+      if (!localPreferences.category) {
+        setError('Please select a category');
+        return;
+      }
+      break;
+    case 3:
+      const selectedSourcesCount = localPreferences.sources.split(',').filter(Boolean).length;
+      if (selectedSourcesCount === 0) {
+        setError('Please select at least one source');
+        return;
+      }
+      if (selectedSourcesCount > 20) {
+        setError(`You can only select up to 20 sources. You have selected ${selectedSourcesCount} source(s).`);
+        return;
+      }
+      break;
+    case 4:
+      if (!localPreferences.summaryStyle || !localPreferences.frequency) {
+        setError('Please complete all preferences');
+        return;
+      }
+      try {
+        await axios.put(`/preferences/${username}`, {
+          country: localPreferences.country,
+          category: localPreferences.category,
+          sources: localPreferences.sources,
+          summaryStyle: localPreferences.summaryStyle,
+          frequency: localPreferences.frequency,
+        });
+        setPreferences(localPreferences);
+        onUpdateComplete();
+      } catch (error) {
+        console.error('Error updating preferences:', error);
+        setError('Failed to update preferences. Please try again.');
+      }
+      return;
+  }
+  setStep(step + 1);
+  setError('');
+};
+
+const renderStep = () => {
+  switch (step) {
+    case 1:
+      return (
+        <>
+          <h2 className="text-xl text-center mb-8">Select your country</h2>
+          <div className="space-y-3">
+            {countries.map((countryCode) => (
+              <button
+                key={countryCode}
+                onClick={() => handleSelection('country', countryCode)}
+                className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                  localPreferences.country === countryCode ? 'border-2 border-[#D5C3C6]' : ''
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full mr-4 ${
+                    localPreferences.country === countryCode ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
                   }`}
-                >
-                  <div className={`w-4 h-4 rounded-full mr-4 ${
+                ></div>
+                {countryCodeMap[countryCode] || countryCode.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </>
+      );
+
+    case 2:
+      return (
+        <>
+          <h2 className="text-xl text-center mb-8">Select a category</h2>
+          <div className="space-y-3">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleSelection('category', category)}
+                className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                  localPreferences.category === category ? 'border-2 border-[#D5C3C6]' : ''
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded-full mr-4 ${
                     localPreferences.category === category ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                  }`}></div>
-                  {category}
-                </button>
-              ))}
-            </div>
-          </>
-        );
+                  }`}
+                ></div>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
+        </>
+      );
 
-      case 3:
-        return (
-          <>
-            <h2 className="text-xl text-center mb-8">Select your language</h2>
-            <div className="space-y-3">
-              {LANGUAGE_OPTIONS.map((language) => (
+    case 3:
+      return (
+        <>
+          <h2 className="text-xl text-center mb-8">Select your news sources (Up to 20)</h2>
+          <div className="space-y-3">
+            {sources.map((source) => {
+              const selectedSources = localPreferences.sources ? localPreferences.sources.split(',') : [];
+              const isSelected = selectedSources.includes(source.id);
+              return (
                 <button
-                  key={language.code}
-                  onClick={() => handleSelection('language', language.code)}
+                  key={source.id}
+                  onClick={() => handleSelection('source', source.id)}
                   className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
-                    localPreferences.language === language.code ? 'border-2 border-[#D5C3C6]' : ''
+                    isSelected ? 'border-2 border-[#D5C3C6]' : ''
                   }`}
                 >
-                  <div className={`w-4 h-4 rounded-full mr-4 ${
-                    localPreferences.language === language.code ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                  }`}></div>
-                  {language.name}
+                  <div
+                    className={`w-4 h-4 rounded-full mr-4 ${
+                      isSelected ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                    }`}
+                  ></div>
+                  {source.name}
                 </button>
-              ))}
-            </div>
-          </>
-        );
-
+              );
+            })}
+          </div>
+          {localPreferences.sources && (
+            <p className="text-center mt-4">
+              {localPreferences.sources.split(',').filter(Boolean).length} source(s) selected. You can select up to 20.
+            </p>
+          )}
+        </>
+      );
+  
       case 4:
         return (
           <>
-            <h2 className="text-xl text-center mb-8">Final Preferences</h2>
+            <h2 className="text-xl text-center mb-8">
+              Select your Summary Style and Update Frequency
+            </h2>
             <div className="space-y-6">
               <div>
-                <p className="mb-3 text-center">Summary Style</p>
-                <select 
-                  value={localPreferences.summaryStyle || ''}
-                  onChange={(e) => handleSelection('summaryStyle', e.target.value)}
-                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
-                >
-                  <option value="">Select style</option>
-                  {SUMMARY_STYLE_OPTIONS.map(style => (
-                    <option key={style} value={style}>
+                <h3 className="text-lg mb-3">Summary Style</h3>
+                <div className="space-y-3">
+                  {summaryStyles.map((style) => (
+                    <button
+                      key={style}
+                      onClick={() => handleSelection('summaryStyle', style)}
+                      className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                        localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6]' : ''
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full mr-4 ${
+                        localPreferences.summaryStyle === style ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                      }`}></div>
                       {style.charAt(0).toUpperCase() + style.slice(1)}
-                    </option>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
-
+  
               <div>
-                <p className="mb-3 text-center">Delivery Frequency (hours)</p>
-                <select 
-                  value={localPreferences.frequency || ''}
-                  onChange={(e) => handleSelection('frequency', parseInt(e.target.value))}
-                  className="w-full bg-[#E8E8E8] rounded-sm py-3 px-4"
-                >
-                  <option value="">Select frequency</option>
-                  <option value="1">Every 1 Hour</option>
-                  <option value="3">Every 3 Hours</option>
-                  <option value="6">Every 6 Hours</option>
-                  <option value="12">Every 12 Hours</option>
-                  <option value="24">Daily</option>
-                </select>
+                <h3 className="text-lg mb-3">Update Frequency (in hours)</h3>
+                <div className="space-y-3">
+                  {frequencies.map((freq) => (
+                    <button
+                      key={freq}
+                      onClick={() => handleSelection('frequency', freq)}
+                      className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                        localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6]' : ''
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full mr-4 ${
+                        localPreferences.frequency === freq ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
+                      }`}></div>
+                      {freq} hour(s)
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </>
         );
     }
   };
-
+  
   return (
-    <div className="flex min-h-screen flex-col items-center p-8">
+    <div className="flex min-h-screen flex-col items-center p-8 pt-24">
       <div className="max-w-md w-full">
-        <h1 className="text-4xl font-bold text-center mb-8">Update your News Preferences</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">
+          THE INBOX ZING!
+        </h1>
         
+        <h2 className="text-xl text-center mb-8">
+          Setup Your Preferences
+        </h2>
+  
         {renderStep()}
-
+        
         {error && (
           <p className="text-red-500 text-center mt-4">{error}</p>
         )}
-
-        <button
-          onClick={handleNext}
-          className="w-full bg-[#D5C3C6] rounded-sm py-3 text-black mt-8"
-        >
-          {step === 4 ? 'Complete Setup' : 'Continue'}
-        </button>
+  
+        <div className="flex justify-between mt-8">
+          {step > 1 && (
+            <button 
+              onClick={() => setStep(step - 1)} 
+              className="w-full bg-[#D5C3C6] rounded-sm py-3 text-black mr-2"
+            >
+              Back
+            </button>
+          )}
+          <button 
+            onClick={handleNext} 
+            className="w-full bg-[#D5C3C6] rounded-sm py-3 text-black ml-2"
+          >
+            {step === 4 ? 'Finish' : 'Next'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
 export default Preferences;
