@@ -25,6 +25,9 @@ from groq import Groq
 import asyncio
 import re
 import secrets
+import gridfs
+from io import BytesIO
+from fastapi.responses import StreamingResponse
 
 AudioSegment.converter = which("ffmpeg") 
 AudioSegment.ffprobe = which("ffprobe")
@@ -95,6 +98,7 @@ client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client['news_app']
 users_collection = db['users']
 news_articles_collection = db['news_articles']
+fs = gridfs.GridFS(db)
 grok_api_key = os.environ.get("GROQ_API_KEY")
 grok_client = Groq(api_key=grok_api_key)
 
@@ -385,6 +389,7 @@ async def login(user: UserLogin):
         return JSONResponse(content={"message": "Login successful", "username": user.username})
     
     raise HTTPException(status_code=401, detail="Invalid username or password")
+
 # Endpoint to handle modifying of previously set user preferences
 @fast_app.put("/preferences/{username}")
 async def update_preferences(username: str, preferences: UserPreferences):
@@ -407,6 +412,7 @@ async def update_preferences(username: str, preferences: UserPreferences):
             print(f"Deleted existing audio file: {final_audio_file}")
         return {"message": "Preferences updated successfully"}
     raise HTTPException(status_code=404, detail="User not found")
+    
 @fast_app.get("/news/{username}")
 async def get_news(username: str):
     user = users_collection.find_one({"username": username})
@@ -480,6 +486,7 @@ async def get_news(username: str):
             upsert=True
         )
     return {"articles": articles}
+
 @fast_app.patch("/news/{username}/mark_as_read")
 async def mark_article_as_read(username: str, article_url: str, readingTime: int = 0):
     # Find the user
@@ -509,6 +516,7 @@ async def mark_article_as_read(username: str, article_url: str, readingTime: int
         }
     )
     return {"message": "Article marked as read", "url": article_url}
+
 @fast_app.get("/news/{username}/statistics")
 async def get_news_statistics(username: str):
     user = users_collection.find_one({"username": username})
@@ -532,6 +540,7 @@ async def get_news_statistics(username: str):
         "articlesLeft": unread_articles,
         "readingTime": total_time_spent,
     }
+
 # Endpoint to get preferences for the Profile Page display
 @fast_app.get("/user/{username}", response_model=UserPreferencesResponse)
 async def get_user_preferences(username: str):
@@ -539,6 +548,7 @@ async def get_user_preferences(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"username": user["username"], "preferences": user.get("preferences", {})}
+
 # Endpoint to handle password update
 @fast_app.put("/user/{username}/password")
 async def update_user_password(username: str, request: UpdatePasswordRequest):
@@ -562,6 +572,7 @@ async def update_user_password(username: str, request: UpdatePasswordRequest):
         raise HTTPException(status_code=404, detail="Password unchanged")
     
     return {"message": "Password updated successfully"}
+
 # Endpoint to get all news articles stored in the database
 @fast_app.get("/news_articles/")
 async def get_news_articles():
@@ -570,7 +581,8 @@ async def get_news_articles():
     for article in articles:
         article["_id"] = str(article["_id"])
     return articles
-# Endpoint to delete a user from the database with his stored data
+
+# Endpoint to delete a user from the database with their stored data
 @fast_app.delete("/user/{username}")
 async def delete_user(username: str):
     # if user is found in db, delete from the database
@@ -578,9 +590,21 @@ async def delete_user(username: str):
     if result.deleted_count:
       # delete the news articles as well
         news_articles_collection.delete_many({"username": username})
+        podcasts = db.podcasts.find({"username": username})
+        for podcast in podcasts:
+            file_id = podcast.get("audio_file_id")
+            if file_id:
+                # Remove the associated audio file from GridFS
+                fs.delete(file_id)
+                print(f"Deleted audio file with file_id: {file_id}")
+        
+        # Delete the podcast records from the podcasts collection
+        db.podcasts.delete_many({"username": username})
+        
         return {"message": f"User {username} and articles associated with the account are deleted"}
     # error handling part when the user is not found
     raise HTTPException(status_code=404, detail="User not found")
+
 async def generate_podcast_script(articles, summary_style, username):
     if not isinstance(articles, list) or not articles:
         print("No articles or invalid structure provided.")
@@ -617,7 +641,7 @@ async def generate_podcast_script(articles, summary_style, username):
                 {"role": "system", "content": "You are a helpful assistant writing podcast scripts."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=300,
+            max_tokens=500,
             temperature=0.7
         )
         podcast_text = response.choices[0].message.content.strip()
@@ -626,10 +650,12 @@ async def generate_podcast_script(articles, summary_style, username):
     except Exception as e:
         print("Error during podcast script generation:", e)
         raise HTTPException(status_code=500, detail="An error occurred while generating the podcast script.")
+    
 async def generate_podcast_audio(script):
     try:
         timestamp = str(int(time.time()))
         podcast_audio_path = os.path.join(audio_directory, f"podcast_audio_{timestamp}.mp3")
+        
         # OpenAI API for text-to-speech (TTS)
         response = openai.audio.speech.create(
             model="tts-1",
@@ -637,72 +663,98 @@ async def generate_podcast_audio(script):
             input=script
         )
         print("TTS Response:", response)
-        with open(podcast_audio_path, "wb") as f:
-            f.write(response.content)
-        print(f"Generated audio saved at: {podcast_audio_path}")
-        return podcast_audio_path
+        
+        audio_data = response.content
+
+        return audio_data
+    
     except Exception as e:
         print("Error during TTS conversion:", e)
         raise HTTPException(status_code=500, detail="An error occurred while converting text to speech.")
-async def add_intro_outro_music(audio_path, music_path, username):
+
+# Storing audio directly into GridFS
+async def store_audio_to_gridfs(audio_data, username):
     try:
-        audio_directory = "src/audio"
-        os.makedirs(audio_directory, exist_ok=True)
-        if audio_path.endswith(".mp3"):
-            wav_audio_path = os.path.join(audio_directory, f"{username}_podcast_audio.wav")
-            AudioSegment.from_file(audio_path, format="mp3").export(wav_audio_path, format="wav")
-            audio_path = wav_audio_path
-        music_file_path = os.path.join(audio_directory, music_path)
-        podcast_audio = AudioSegment.from_file(audio_path, format="wav")
-        background_music = AudioSegment.from_file(music_file_path, format="wav")
-        intro_music = background_music[:10000].fade_in(3000) - 20
-        outro_music = background_music[:10000].fade_out(3000) - 20
-        combined_audio = intro_music + podcast_audio.fade_in(3000).fade_out(3000) + outro_music
-        final_audio_path = os.path.join(audio_directory, f"{username}_final_podcast_audio.wav")
-        combined_audio.export(final_audio_path, format="wav")
-        # Return the relative URL for the generated file
-        return f"/audio/{username}_final_podcast_audio.wav"
+        print(f"Storing audio of size: {len(audio_data)} bytes")
+        filename = f"{username}_podcast_audio.mp3"
+
+        file_id = fs.put(audio_data, filename=filename)
+        print(f"Stored audio with file_id: {file_id}") 
+
+        return file_id
     except Exception as e:
-        print("Error adding intro/outro music:", e)
-        raise HTTPException(status_code=500, detail="Error adding intro/outro music.")
-@fast_app.get("/podcast_script/{username}")
-async def create_podcast_script(username: str):
+        print("Error storing audio to GridFS:", e)
+        raise HTTPException(status_code=500, detail="An error occurred while storing audio to GridFS.")
+    
+
+@fast_app.get("/podcast/{username}")
+async def create_podcast(username: str):
     try:
-        audio_dir = os.path.join("src", "audio")
-        final_audio_file = os.path.join(audio_dir, f"{username}_final_podcast_audio.wav")
-        # Check if the final audio file already exists
-        if os.path.exists(final_audio_file):
-            audio_url = f"/audio/{username}_final_podcast_audio.wav"
-            print(audio_url)
-            return JSONResponse(content={"audio_url": audio_url})
-        # Fetch user preferences (simulate database calls)
+        # Checking if the podcast exists by username and articles
         user = users_collection.find_one({"username": username})
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
+
+        # Checking for the user's existing podcast
         user_news = news_articles_collection.find_one({"username": username})
         if not user_news or not user_news.get("articles"):
             raise HTTPException(status_code=404, detail="No articles found for this user.")
+        
+        # Checking if the podcast with the same articles exists
         articles = user_news["articles"]
+        existing_podcast = db.podcasts.find_one({"username": username, "articles": articles})
+        if existing_podcast:
+            
+            file_id = existing_podcast["audio_file_id"]
+            print(f"Found existing podcast with file_id: {file_id}")
+            audio_file = fs.get(file_id)
+            return StreamingResponse(BytesIO(audio_file.read()), media_type="audio/mpeg")
+
+        # Generating a new podcast if no match is found
         preferences = user.get("preferences", {})
         summary_style = preferences.get("summaryStyle", "brief")
-        # Generate podcast script asynchronously and wait for it to complete
         podcast_script = await generate_podcast_script(articles, summary_style, username)
-        # Generate audio for the podcast script asynchronously and wait for it to complete
-        audio_path = await generate_podcast_audio(podcast_script)
-        # Add intro and outro music asynchronously and wait for it to complete
-        final_audio_path = await add_intro_outro_music(audio_path, "podcast_intro.wav", username)
-        # Ensure the final path is a relative URL for the response
-        audio_url = final_audio_path
-        # Return only the audio URL
-        return JSONResponse(content={"audio_url": audio_url})
+
+        audio_data = await generate_podcast_audio(podcast_script)
+
+        # Storing the podcast audio to GridFS
+        file_id = await store_audio_to_gridfs(audio_data, username)
+        print(f"Generated new file_id: {file_id}")  
+
+        db.podcasts.insert_one({
+            "username": username,
+            "articles": articles,
+            "audio_file_id": file_id,
+            "created_at": time.time()
+        })
+
+        return JSONResponse(content={"audio_url": f"/audio/{str(file_id)}"})
     except HTTPException as e:
-        print(f"Error in podcast script endpoint: {e.detail}")
+        print(f"Error in podcast endpoint: {e.detail}")
         return JSONResponse(content={"error": e.detail}, status_code=e.status_code)
     except Exception as e:
-        print("Unexpected error in podcast script endpoint:", e)
+        print("Unexpected error in podcast endpoint:", e)
         return JSONResponse(content={"error": "An unexpected error occurred."}, status_code=500)
+
+@fast_app.get("/audio/{file_id}")
+async def get_audio(file_id: str):
+    try:
+        
+        object_id = ObjectId(file_id)  
+        print(f"Fetching audio with ObjectId: {object_id}") 
+
+        file = fs.get(object_id)  
+        print(f"Found file in GridFS with ObjectId: {object_id}")  
+
+        audio_content = file.read() 
+        print(f"Audio file size: {len(audio_content)} bytes")  
+
+        return StreamingResponse(BytesIO(audio_content), media_type="audio/mpeg")
+    except Exception as e:
+        print("Error fetching audio from GridFS:", e)
+        raise HTTPException(status_code=404, detail="Audio file not found.")
     
-# Complete the points update endpoint
+# The points update endpoint
 @fast_app.post("/points/update")
 async def update_user_points(username: str, points: int):
     user = users_collection.find_one({"username": username})
