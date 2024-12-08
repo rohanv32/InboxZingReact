@@ -15,9 +15,7 @@ COPY . .
 
 # Set the REACT_APP_BACKEND_URL environment variable before building the React app
 ARG REACT_APP_BACKEND_URL
-ARG REACT_APP_NEWS_API_KEY
 ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
-ENV REACT_APP_NEWS_API_KEY=$REACT_APP_NEWS_API_KEY
 
 # Build application
 RUN npm run build
