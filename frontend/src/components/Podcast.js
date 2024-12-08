@@ -36,7 +36,7 @@ const Podcast = ({ username }) => {
                 <h1 className="text-4xl font-bold mb-8">Podcast for {username}</h1>
                 
                 {isLoading ? (
-                    <p className="text-lg">Loading your podcast...</p>
+                    <p className="text-lg">Loading your podcast..</p>
                 ) : error ? (
                     <p className="text-red-500 mb-4">Error: {error}</p>
                 ) : (
