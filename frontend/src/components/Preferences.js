@@ -2,8 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { UserContext } from './UserContext';
 
-const NEWS_API_KEY = process.env.REACT_APP_NEWS_API_KEY;
-
 function Preferences({ onUpdateComplete, username }) {
   const { preferences, setPreferences } = useContext(UserContext);
   const [step, setStep] = useState(1);
