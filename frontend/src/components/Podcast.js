@@ -11,13 +11,13 @@ const Podcast = ({ username }) => {
             setError(null);
 
             try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/podcast_script/${username}`);
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/podcast/${username}`);
                 if (!response.ok) {
                     throw new Error("Failed to generate podcast");
                 }
 
-                const data = await response.json();
-                setAudioUrl(data.audio_url);
+                const audioUrl = `${process.env.REACT_APP_BACKEND_URL}/podcast/${username}`;
+                setAudioUrl(audioUrl); 
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -44,7 +44,7 @@ const Podcast = ({ username }) => {
                         <h2 className="text-2xl font-semibold mb-4">Audio</h2>
                         {audioUrl ? (
                             <audio controls className="w-full">
-                                <source src={audioUrl} type="audio/wav" />
+                                <source src={audioUrl} type="audio/mpeg" />
                                 Your browser does not support the audio element.
                             </audio>
                         ) : (
