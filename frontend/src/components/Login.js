@@ -187,7 +187,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
             {/* <a
               href="#"
               onClick={(e) => { e.preventDefault(); onForgotPassword(); }}
-              className="text-black underline"
+              className="underline"
             >
               Forgot password?
             </a> */}
@@ -198,7 +198,7 @@ function Login({ onLogin, onNavigateToSignUp }) {
             <button
               type="button"
               onClick={() => navigate('/signup')}
-              className="text-black underline"
+              className="underline"
             >
               Sign up
             </button>
@@ -251,7 +251,7 @@ function ForgotPassword({ email, onEmailChange, onSubmit, notification, onBack }
           <button
             type="button"
             onClick={onBack}
-            className="text-black underline"
+            className="underline"
           >
             Back to Login
           </button>

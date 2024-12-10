@@ -46,7 +46,7 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
     <div className="relative isolate bg-white">
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'bg-white/80 backdrop-blur-lg shadow-md' : 'bg-transparent'
+          isScrolled ? 'bg-purple-80 backdrop-blur-lg shadow-md' : 'bg-transparent'
         }`}
       >
         <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
@@ -58,8 +58,8 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
             </button>
             {/* Points Display */}
             {isLoggedIn && (
-              <span className="ml-4 text-sm font-semibold text-gray-700">
-                Points: <span className="text-gray-900">{points}</span>
+              <span className="ml-4 text-sm font-semibold">
+                Points: <span>{points}</span>
               </span>
             )}
           </div>
@@ -88,7 +88,7 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
                   handleNavigation(item.path);
                 }
               }}
-              className={`text-sm font-semibold text-gray-900 ${
+              className={`text-sm font-semibold ${
                 location.pathname === item.path ? 'text-blue-500' : ''
               }`}
             >

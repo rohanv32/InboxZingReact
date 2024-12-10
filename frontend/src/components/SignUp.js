@@ -247,7 +247,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
               <span>Already have an account? </span>
               <button
                 onClick={() => navigate('/login')}
-                className="text-black underline"
+                className="underline"
               >
                 Login
               </button>
