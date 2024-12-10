@@ -227,6 +227,8 @@ We chose **MongoDB** for this project due to the following reasons:
 - **Scalability**: It can handle large volumes of data efficiently, making it suitable for storing numerous articles fetched from various sources.
 - **Performance**: MongoDB's document-oriented structure enables fast data retrieval, which is great for providing users with timely news updates.
 
+Refer to InboxZingDatabase.pdf for the database architecture diagram.
+
 ---
 
 ## 📝 Design Decisions
@@ -253,6 +255,8 @@ We chose **MongoDB** for this project due to the following reasons:
 
 Refer to the Figma link below for a prototype of the application.
 **Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
+
+Refer to InboxZing (1).pdf for the latest Figma wireframes.
 
 ---
 
