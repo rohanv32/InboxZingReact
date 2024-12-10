@@ -44,28 +44,101 @@ Before you begin, make sure you have the following installed:
 
 - **Node.js** (v14 or later) & **npm** (Node Package Manager)
   - [Download Node.js](https://nodejs.org/)
-
+- Python 3.x
+- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account for database setup
+- [NewsAPI](https://newsapi.org) account to obtain an API key
+- OpenAI API Key
+- Groq API Key
+- Sendgrid API Key
+- An email account to send email from using Sendgrid
+  
 ---
 
 ## 🛠️ Installation & Setup
 
 To set up Inbox Zing locally, follow these steps:
 
+### Frontend:
+
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/rohanv32/InboxZingFrontend.git
+   git clone https://github.com/rohanv32/InboxZingReact.git
 
-2. **Navigate to the Project Directory**:
+2. **Navigate to the Frontend Directory**:
    ```bash
-   cd InboxZingFrontend
+   cd frontend
 
-3. **Install Dependencies**:
+3. **Configure Environment Variables**
+
+   Create a .env File, make sure to replace username, password, and API keys with your actual credentials:
+
+   ```bash
+   REACT_APP_BACKEND_URL=http://localhost:8000
+   PORT=3000
+   REACT_APP_NEWS_API_KEY=your_news_api_key_here
+
+5. **Install Dependencies**:
    ```bash
    npm install
+
+### Backend:
+
+1. **Navigate to the Backend Directory**
+   
+   ```bash
+   cd backend
+
+3. **Create a Virtual Environment**
+
+   Creating a virtual environment helps keep your project dependencies isolated.
+
+      ```bash
+      python -m venv venv
+      source venv/bin/activate  
+      # On Windows use `venv\Scripts\activate`
+
+4. **Install Dependencies**
+
+   To install the required dependencies for the project, run:
+
+      ```bash
+      pip install -r requirements.txt
+
+5. **Set Up MongoDB**
+
+     Create a new cluster in MongoDB Atlas.
+   
+     Add a database user with read and write permissions.
+   
+     Whitelist your IP address for database access.
+   
+     Obtain your connection string from MongoDB Atlas and replace the placeholder in the code with your connection string.
+   
+6. **Configure Environment Variables**
+
+   Create a .env File, make sure to replace username, password, and API keys with your actual credentials:
+   
+      ```bash
+      REACT_APP_FRONTEND_URL=http://localhost:3000
+      PORT=8000
+      MONGO_URI=mongodb+srv://<username>:<password>@newcluster.hj9pw.mongodb.net/?retryWrites=true&w=majority&appName=NewCluster
+      NEWS_API_KEY=your_news_api_key_here
+      openai.api_key=your_openai_key_here
+      REACT_APP_NEWS_API_KEY=your_news_api_key_here
+      GROQ_API_KEY=your_groq_api_key_here
+      SENDGRID_API_KEY=your_sendgrid_api_key_here
+      SENDGRID_FROM_EMAIL=your_email_here
+
+7. **Run the Backend Application**
+
+     Once you have set up your virtual environment, installed dependencies, and configured MongoDB and NewsAPI, you can run the application's backend:
+
+      ```bash
+        python3 api.py
    
 ---
 
-## ▶️ Running the Application
+## ▶️ Running the Full Stack Application
 
 After the setup is complete, you’re ready to launch Inbox Zing!
 
@@ -84,18 +157,21 @@ Here are some key pages in the Inbox Zing app:
 ### 1. Authentication Page
 - **Sign Up** or **Login** to get started.
 
-### 2. News Feed
-- A curated feed with the latest articles from selected sources.
-- **Dismiss** articles you’re not interested in.
-
-### 3. Preferences Setup
+### 2. Preferences Setup
 - Choose media outlets, country, and language to personalize your experience.
 - Set your **news delivery frequency** and **summary style**.
 
-### 4. Account Deletion
+### 3. News Feed
+- A curated feed with the latest articles from selected sources.
+- **Dismiss** articles you’re not interested in.
+
+### 4. Profile
+- View user preferences settings and statistics.
+
+### 5. Account Deletion
 - Easily delete your account if you no longer wish to use the service.
 
-### 5. Podcast
+### 6. Podcast
 - Podcast for hand-free news update
 
 ---
@@ -103,9 +179,11 @@ Here are some key pages in the Inbox Zing app:
 ## 📚 Usage Guide
 
 1. **Sign Up / Login**: Access the app by signing up for a new account or logging into an existing one.
-2. **Customize Preferences**: Choose your preferred news sources, language, location, and frequency of updates.
+2. **Customize Preferences**: Choose your preferred news sources, language, location, frequency of updates and summary style.
 3. **View and Manage Feed**: Stay updated with the latest news in a format and frequency that suit your preferences.
-4. **Delete Account**: Remove your account anytime through the **Delete Account** page.
+4. **Profile**: Check current user preference setting and user reading statistics.
+5. **Delete Account**: Remove your account anytime through the **Delete Account** page.
+6. **Podcast**: Go to the podcast tab to generate a customized podcast.
 
 ---
 
@@ -114,10 +192,6 @@ Here are some key pages in the Inbox Zing app:
 - **Frontend**: ReactJS, JavaScript, HTML, CSS
 - **Styling**: Styled-components / CSS Modules including SweetAlert2 for stylised alerts and Ant Design for Dark/Light Reading Mode
 - **Backend**: Python, MongoDB, Pydantic, News API, Sendgrid API, OpenAI API
-
-**Backend Guide**
-
-  Please go to https://github.com/rohanv32/InboxZing and follow the set-up instructions there.
 
 ---
 
@@ -143,6 +217,15 @@ Here are some key pages in the Inbox Zing app:
 | GET        | `/points/{username}`            | To fetch current points the user has.                              |
 | GET        | `/news_sources`                 | To fetch and process news sources grouped by country and category. |
 | GET        | `/streak/{username}`            | To get the user's reading streak statistic.                        |
+
+---
+
+## 🗃️ MongoDB Rationale
+
+We chose **MongoDB** for this project due to the following reasons:
+- **Schema Flexibility**: MongoDB allows for dynamic schemas, which is ideal for a news application where user preferences and articles can vary significantly.
+- **Scalability**: It can handle large volumes of data efficiently, making it suitable for storing numerous articles fetched from various sources.
+- **Performance**: MongoDB's document-oriented structure enables fast data retrieval, which is great for providing users with timely news updates.
 
 ---
 
@@ -187,3 +270,7 @@ Refer to the Figma link below for a prototype of the application.
 - **Code Suggestions and Debugging**: Leveraged AI to generate code snippets, troubleshoot issues, and suggest improvements, especially in CSS and component rendering logic.
 - **Documentation Assistance**: AI was used to streamline the creation of project documentation and provide a structured approach to the README and component documentation.
 
+---
+
+## 📄 License
+This project is licensed under the MIT license.
