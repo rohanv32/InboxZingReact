@@ -41,82 +41,82 @@ function NewsFeed({ newsArticles, username }) {
     };
 
     fetchArticles();
-  }, [username]);  // Only depend on username
+  }, [username]);  
 
   const handleArticleClick = (article) => {
-    setStartTime(Date.now()); // Start the timer
+    setStartTime(Date.now()); 
     setSelectedArticle(article);
   };
 
   const handleBackToFeed = async () => {
     const endTime = Date.now();
-    const readingTime = (endTime - startTime) / 1000; // Time in seconds
+    const readingTime = (endTime - startTime) / 1000; 
 
     console.log(`Reading time: ${readingTime} seconds`);
 
-    if (readingTime >= 20) { // Example threshold: 20 seconds
-      const basePoints = 10;
-      const bonusMultiplier = clickCount * 0.1; // Incremental bonus
-      const earnedPoints = Math.round(basePoints + basePoints * bonusMultiplier);
+    let earnedPoints = 0;
 
-      console.log(`Points earned for this article: ${earnedPoints}`);
+    // Only award points if reading time exceeds threshold
+    if (readingTime >= 20) { 
+        const basePoints = 10;
+        const bonusMultiplier = clickCount * 0.1; // Incremental bonus
+        earnedPoints = Math.round(basePoints + basePoints * bonusMultiplier);
 
-      // Update points locally
-      setClickCount(prev => prev + 1);
-      setPoints(prev => prev + earnedPoints);
+        alert(`Points earned for this article: ${earnedPoints}`);
 
-      // Mark the article as read in the local state
-      const updatedArticles = articles.map((articleItem) =>
-        articleItem.url === selectedArticle.url
-          ? { ...articleItem, isRead: true }
-          : articleItem
-      );
-      setArticles(updatedArticles);
+        setClickCount(prev => prev + 1);
+        setPoints(prev => prev + earnedPoints);
 
-      // Decrease the remaining articles count
-      setRemainingArticles(prev => prev - 1);
+        const updatedArticles = articles.map((articleItem) =>
+          articleItem.url === selectedArticle.url
+            ? { ...articleItem, isRead: true }
+            : articleItem
+        );
+        setArticles(updatedArticles);
 
-      // Check if all articles are read, and if so, give bonus points
-      if (remainingArticles === 0) {
-        setPoints(prev => prev + 20);  // Add the bonus points
-      }
+        setRemainingArticles(prev => prev - 1);
 
-      // Update points on the backend
-      try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${username}&points=${earnedPoints}`, {
-          method: 'POST',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to update points');
+        // Check if all articles are read, and if so, give bonus points
+        if (remainingArticles === 0) {
+            setPoints(prev => prev + 20);  // Add the bonus points
         }
+    } else {
+        alert("Remember, finish reading an article completely to earn points!");
+    }
 
-        const data = await response.json();
-        console.log('Points updated successfully:', data.message);
-      } catch (error) {
-        console.error('Error updating points:', error.message);
-      }
-
-      // Mark the article as read in the backend (along with reading time)
-      try {
+    try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/news/${username}/mark_as_read?article_url=${selectedArticle.url}&readingTime=${Math.round(readingTime)}`, {
-          method: 'PATCH',
+            method: 'PATCH',
         });
 
         if (!response.ok) {
-          throw new Error('Failed to mark article as read');
+            throw new Error('Failed to mark article as read');
         }
 
         const data = await response.json();
         console.log('Article marked as read successfully:', data.message);
-      } catch (error) {
+    } catch (error) {
         console.error('Error marking article as read:', error.message);
-      }
-    } else {
-      console.log("Not enough time spent reading to earn points.");
     }
 
-    setSelectedArticle(null); // Go back to the feed
+    if (earnedPoints > 0) {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${username}&points=${earnedPoints}`, {
+                method: 'POST',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update points');
+            }
+
+            const data = await response.json();
+            console.log('Points updated successfully:', data.message);
+        } catch (error) {
+            console.error('Error updating points:', error.message);
+        }
+    }
+
+    setSelectedArticle(null); 
   };
 
 
