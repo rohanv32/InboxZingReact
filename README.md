@@ -123,10 +123,26 @@ Here are some key pages in the Inbox Zing app:
 
 ## 📌 Endpoints
 
-| **Method** | **Endpoint**       | **Description**                    |
-|------------|--------------------|------------------------------------|
-| GET        | `/status`          | Retrieve the login status of user. |
-| POST       | `/signup`          | Create a new user.                 |
+| **Method** | **Endpoint**                    | **Description**                                                    |
+|------------|---------------------------------|--------------------------------------------------------------------|
+| GET        | `/status`                       | To retrieve user login status.                                     |
+| POST       | `/signup`                       | To create a new user.                                              |
+| POST       | `/verify_confirmation`          | To verify user by email.                                           |
+| POST       | `/login`                        | To login user to send email updates.                               |
+| PUT        | `/preferences/{username}`       | To modify user preferences.                                        |
+| GET        | `/news/{username}`              | To fetch news articles according to user preferences.              |
+| PATCH      | `/news/{username}/mark_as_read` | To mark news articles as read status.                              |
+| GET        | `/news/{username}/statistics`   | To calculate user statistics.                                      |
+| GET        | `/user/{username}`              | To get preferences for profile page display.                       |
+| PUT        | `/user/{username}/password`     | To handle password update.                                         |
+| GET        | `/news_articles/`               | To get all news articles stored in the database.                   |
+| DELETE     | `/user/{username}`              | To delete user and their stored data from the database.            |
+| GET        | `/podcast/{username}`           | To retrieve podcast for the user.                                  |
+| GET        | `/audio/{file_id}`              | To get audio for the podcast.                                      |
+| POST       | `/points/update`                | To update points earned by the user.                               |
+| GET        | `/points/{username}`            | To fetch current points the user has.                              |
+| GET        | `/news_sources`                 | To fetch and process news sources grouped by country and category. |
+| GET        | `/streak/{username}`            | To get the user's reading streak statistic.                        |
 
 ---
 
