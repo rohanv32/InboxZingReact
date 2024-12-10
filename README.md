@@ -146,13 +146,6 @@ Here are some key pages in the Inbox Zing app:
 
 ---
 
-## 🐞 Error Handling
-
-- **Issue**: "App does not load or shows a blank screen."
-  - **Solution**: Ensure that the backend server is running and accessible at the correct endpoint.
-
----
-
 ## 📝 Design Decisions
 
 - **React Components**: Each React component is modular and reusable, representing distinct UI parts (e.g., news card, preferences, authentication). This structure simplifies maintenance and scaling.
