@@ -1,4 +1,4 @@
-# 📬 Inbox Zing - Frontend Application
+# 📬 Inbox Zing - Full-Stack Application
 
 Welcome to **Inbox Zing!** 🎉 This React-based application is designed to bring you the latest news and updates from various media outlets, all in one place. Enjoy a sleek, intuitive interface with easy navigation options to set your preferences, customize your experience, and stay informed.
 
@@ -111,12 +111,22 @@ Here are some key pages in the Inbox Zing app:
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React, JavaScript, HTML, CSS
-- **Styling**: Styled-components / CSS Modules
+- **Frontend**: ReactJS, JavaScript, HTML, CSS
+- **Styling**: Styled-components / CSS Modules including SweetAlert2 for stylised alerts and Ant Design for Dark/Light Reading Mode
+- **Backend**: Python, MongoDB, Pydantic, News API, Sendgrid API, OpenAI API
 
 **Backend Guide**
 
   Please go to https://github.com/rohanv32/InboxZing and follow the set-up instructions there.
+
+---
+
+## 📌 Endpoints
+
+| **Method** | **Endpoint**       | **Description**                    |
+|------------|--------------------|------------------------------------|
+| GET        | `/status`          | Retrieve the login status of user. |
+| POST       | `/signup`          | Create a new user.                 |
 
 ---
 
