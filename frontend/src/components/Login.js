@@ -184,13 +184,13 @@ function Login({ onLogin, onNavigateToSignUp }) {
           </div>
 
           <div className="text-center">
-            <a
+            {/* <a
               href="#"
               onClick={(e) => { e.preventDefault(); onForgotPassword(); }}
               className="text-black underline"
             >
               Forgot password?
-            </a>
+            </a> */}
           </div>
 
           <div className="text-center">
