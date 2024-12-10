@@ -4,6 +4,18 @@ Welcome to **Inbox Zing!** 🎉 This React-based application is designed to brin
 
 ---
 
+## 👥 Team Members
+
+Rohan Sabu
+
+Komal Neupane
+
+Ali Tamer
+
+Olivia Xiang
+
+---
+
 ## 🚀 Features
 
 - **🔒 Registration Page**: The entry point of the app provides options to **Sign Up** or **Login** to access your personalized news feed. Start by creating an account or logging into an existing one.
