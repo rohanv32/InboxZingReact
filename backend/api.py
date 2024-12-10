@@ -135,9 +135,7 @@ def fetch_news(preferences: UserPreferences) -> List[dict]:
     return articles[:10]
 
 def summarize_article(article: dict, summary_style: str) -> str:
-    content = article.get("content", "No content available.")
-    if not content:  
-        content = article.get("title", "No content or title available.")
+    content = article.get("content") or article.get("title") or "No content or title available."
     if summary_style == "Brief":
         prompt = f"Summarize this article briefly, keeping it insightful, yet concise. Please go straight into the summary, do not repeat the prompt in any way.: {content}"
     elif summary_style == "Detailed":
