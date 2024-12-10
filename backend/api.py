@@ -234,10 +234,75 @@ def send_confirmation_email(user_email: str, confirmation_code: str):
         sg = SendGridAPIClient(sendgrid_api_key)
         response = sg.send(message)
         print(f"Email sent to {user_email}. Status Code: {response.status_code}")
+        
+        # Updating the temporary user document with the new confirmation code, if multiple
+        temp_users_collection.update_one(
+            {"email": user_email},
+            {"$set": {"confirmation_code": confirmation_code}}
+        )
+
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
         return False
+
+def export_newsfeed_as_html(articles):
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Inbox Zing - News Feed</title>
+        <style>
+            /* Your existing styles */
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">Your Personalized News Feed</div>
+            {"".join(
+                f'''
+                <div class="article">
+                    <h2>{article['title']}</h2>
+                    <img src="{article.get('urlToImage', '')}" alt="{article['title']}"/>
+                    <p>{article['summary']}</p>
+                    <a href="{article['url']}" target="_blank">Read More</a>
+                </div>
+                ''' for article in articles
+            )}
+        </div>
+    </body>
+    </html>
+    """
+    return html_content
+
+
+
+
+
+def send_newsfeed_html_email(user_email: str, username: str, html_content: str):
+    # Get SendGrid API Key from environment
+    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+    sendgrid_email = os.getenv('SENDGRID_FROM_EMAIL')
+
+    # Create email with HTML content
+    message = Mail(
+        from_email=sendgrid_email,
+        to_emails=user_email,
+        subject=f'{username}, Your Personalized News Feed',
+        html_content=html_content
+    )
+
+    try:
+        # Send the email
+        sg = SendGridAPIClient(sendgrid_api_key)
+        response = sg.send(message)
+        print(f"Email sent to {user_email}. Status Code: {response.status_code}")
+        return True
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
+
+
 
 
 @fast_app.post("/signup")
@@ -358,11 +423,27 @@ async def login(user: UserLogin):
                     articles = news_response.get("articles", [])
                     # Send email if articles exist
                     if articles:
-                        email_sent = send_news_summary_email(
+                        summarized_articles = []
+                        for article in articles:
+                            summary = article.get('summary', 'No summary available')
+                            source_name = article.get('source', 'Unknown Source')
+                            summarized_articles.append({
+                                "title": article['title'],
+                                "source": source_name,
+                                "description": article['description'],
+                                "url": article['url'],
+                                "published_at": article.get('publishedAt'),
+                                "urlToImage": article.get('urlToImage'),
+                                "summary": summary,
+                                "isRead": False
+                            })
+                         # Export news feed as HTML
+                        html_content = export_newsfeed_as_html(summarized_articles)
+                        # Send the HTML email
+                        email_sent = send_newsfeed_html_email(
                             user_email=db_user["email"],
                             username=user.username,
-                            articles=articles,
-                            summary_style=db_user["preferences"].get("summaryStyle", "Humorous")
+                            html_content=html_content
                         )
                         # Update last email sent time if email was sent successfully
                         if email_sent:
