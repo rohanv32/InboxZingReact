@@ -76,8 +76,6 @@ class VerifyConfirmationCodeRequest(BaseModel):
 load_dotenv()
 fast_app = FastAPI()
 
-fast_app.mount("/audio", StaticFiles(directory="src/audio"), name="audio")
-
 # connect to database (mongoDB)
 MONGO_URI = os.getenv("MONGO_URI")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
