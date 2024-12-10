@@ -240,19 +240,27 @@ def send_confirmation_email(user_email: str, confirmation_code: str):
     except Exception as e:
         print(f"Error sending email: {e}")
         return False
-    
+
+
 @fast_app.post("/signup")
 async def signup(user: UserCreate):
     # Hash the user's password for security
     hashed_password = hash_password(user.password)
+# Couple of checks to make sure there are no duplicate users
+
+     # Check if the email already exists in registered users
+    existing_user = users_collection.find_one({"email": user.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered. Please log in, or sign up with a new Email")
 
     # Check if the username already exists
     existing_user = users_collection.find_one({"username": user.username})
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
+        
 
     # Generate a confirmation code
-    confirmation_code = secrets.token_hex(6)  # Generate a 12-character hexadecimal string
+    confirmation_code = secrets.token_hex(6)  
 
     # Create the temporary user document
     temp_user = {
@@ -270,12 +278,13 @@ async def signup(user: UserCreate):
     try:
         temp_users_collection.insert_one(temp_user)
 
-        # Send confirmation email
         send_confirmation_email(user.email, confirmation_code)
 
-        return {"message": "Signup initiated. Please check your email to confirm your account."}
+        return {"message": "Signup initiated! Please check your email to confirm your account!"}
+    
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error initiating signup: {str(e)}")
+
 
 @fast_app.post("/verify_confirmation")
 async def verify_confirmation(request: VerifyConfirmationCodeRequest):
