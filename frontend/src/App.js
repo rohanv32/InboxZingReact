@@ -33,7 +33,7 @@ function App() {
     setThemeMode((prevMode) => (prevMode === 'Light' ? 'Dark' : 'Light'));
   };
 
-  // Function to fetch user credentials from backend API
+  // Authenticates the user using their credentials (username and password) and, on success, sets a token or session data.
   const handleLogin = async (credentials) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
