@@ -29,16 +29,6 @@ import gridfs
 from io import BytesIO
 from fastapi.responses import StreamingResponse
 
-AudioSegment.converter = which("ffmpeg") 
-AudioSegment.ffprobe = which("ffprobe")
-
-# Define the directory path where you want to save the audio files
-audio_directory = os.path.join(os.getcwd(), "src", "audio")
-
-# Ensure the audio directory exists
-if not os.path.exists(audio_directory):
-    os.makedirs(audio_directory)
-
 # Model used to Capture user sign up credentials.
 class UserCreate(BaseModel):
     username: str
@@ -653,8 +643,6 @@ async def generate_podcast_script(articles, summary_style, username):
     
 async def generate_podcast_audio(script):
     try:
-        timestamp = str(int(time.time()))
-        podcast_audio_path = os.path.join(audio_directory, f"podcast_audio_{timestamp}.mp3")
         
         # OpenAI API for text-to-speech (TTS)
         response = openai.audio.speech.create(
