@@ -10,9 +10,9 @@ Welcome to **Inbox Zing!** 🎉 This React-based application is designed to brin
 
 - **📰 News Feed**: Once logged in, you will be welcomed with a clean, card-based news feed with the latest articles. Each card contains:
   - Headline and source for quick identification.
-  - Short snippet for a preview of the article.
+  - A short snippet for a preview of the article.
   - Option to dismiss unwanted articles to keep your feed tidy.
-  - The current design is just a mock up before the final design by the end of the project.
+  - The current design is just a mock-up before the final design by the end of the project.
 
 - **🔄 Preferences Setup**:
   - **Media Outlets Selection**: Choose from a range of popular media outlets (e.g., **Axios**, **Bloomberg**, **Reuters**, etc.) to filter the sources for your news feed.
@@ -20,7 +20,7 @@ Welcome to **Inbox Zing!** 🎉 This React-based application is designed to brin
   - **News Delivery Preferences**: Select your preferred **news update frequency** (e.g., every 12 hours) and **summary style** (e.g., brief or in-depth) to stay up-to-date in a way that suits your schedule.
 
 - **🗑️ Account Management**:
-  - **Delete Account**: If you wish to unsubscribe from the service, the app provides an option to delete your account permanently.
+  - **Delete Account**: If you wish to unsubscribe from the service, the app allows you to delete your account permanently.
 
 - **🌐 Responsive Design**: Built to look great on desktop, tablet, and mobile devices for a seamless experience across any device.
 
@@ -83,6 +83,9 @@ Here are some key pages in the Inbox Zing app:
 ### 4. Account Deletion
 - Easily delete your account if you no longer wish to use the service.
 
+### 5. Podcast
+- Podcast for hand-free news update
+
 ---
 
 ## 📚 Usage Guide
@@ -101,9 +104,17 @@ Here are some key pages in the Inbox Zing app:
 
 **Backend Guide**
 
-  Please go to https://github.com/rohanv32/InboxZing and follow the set up instructions there.
+  Please go to https://github.com/rohanv32/InboxZing and follow the set-up instructions there.
 
 ---
+
+## 🐞 Error Handling
+
+- **Issue**: "App does not load or shows a blank screen."
+  - **Solution**: Ensure that the backend server is running and accessible at the correct endpoint.
+
+---
+
 ## 📝 Design Decisions
 
 - **React Components**: Each React component is modular and reusable, representing distinct UI parts (e.g., news card, preferences, authentication). This structure simplifies maintenance and scaling.
@@ -125,14 +136,23 @@ Here are some key pages in the Inbox Zing app:
 ---
 
 ## 🥳 Wireframe
+
+Refer to the Figma link below for a prototype of the application.
 **Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
+
+---
+
+## ➕ Additional Features
+
+- **On-demand podcast voice cloning**
+- **Personalised news consumption experience for user**
+- **Localised features for university students to build community traction**
+- **Short-form news and gamification for user engagement**
 
 ---
 
 ## 🤖 AI Usage
 
-Code Suggestions and Debugging: Leveraged AI for generating code snippets and troubleshooting issues during development, especially while considering CSS style implementation and conditional rendering of pages baesd on login states.
-
-Documentation Assistance: AI was used to streamline the creation of project documentation and provide a structured approach to the README and component documentation.
-
+- **Code Suggestions and Debugging**: Leveraged AI to generate code snippets, troubleshoot issues, and suggest improvements, especially in CSS and component rendering logic.
+- **Documentation Assistance**: AI was used to streamline the creation of project documentation and provide a structured approach to the README and component documentation.
 
