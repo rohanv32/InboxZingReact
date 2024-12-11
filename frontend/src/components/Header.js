@@ -13,15 +13,15 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
   const location = useLocation();
 
   const navigation = isLoggedIn
-  ? [
-      { name: 'News Feed', path: '/newsfeed' },
-      { name: 'Preferences', path: '/preferences' },
-      { name: 'Delete Account', path: '/deleteuser' },
-      { name: 'Profile', path: '/profile' },
-      { name: 'Podcast', path: '/podcast' },
-      { name: 'Logout', onClick: onLogout },
-    ]
-  : [];
+    ? [
+        { name: 'News Feed', path: '/newsfeed' },
+        { name: 'Preferences', path: '/preferences' },
+        { name: 'Delete Account', path: '/deleteuser' },
+        { name: 'Profile', path: '/profile' },
+        { name: 'Podcast', path: '/podcast' },
+        { name: 'Logout', onClick: onLogout },
+      ]
+    : [];
 
   // Handle scroll state
   useEffect(() => {
@@ -58,8 +58,8 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
             </button>
             {/* Points Display */}
             {isLoggedIn && (
-              <span className="ml-4 text-sm font-semibold">
-                Points: <span>{points}</span>
+              <span className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-md">
+                💎 Points: <span>{points}</span>
               </span>
             )}
           </div>
@@ -72,30 +72,30 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
             >
               <span className="sr-only">Open main menu</span>
-              <Bars3Icon aria-hidden="true" className="h-6 w-6 text-blue-500"/>
+              <Bars3Icon aria-hidden="true" className="h-6 w-6 text-blue-500" />
             </button>
           </div>
 
           {/* Navigation for Large Screens */}
           <div className="hidden lg:flex lg:gap-x-12">
-          {navigation.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {
-                if (item.onClick) {
-                  item.onClick();  // Call the logout function directly here
-                } else {
-                  handleNavigation(item.path);
-                }
-              }}
-              className={`text-sm font-semibold ${
-                location.pathname === item.path ? 'text-blue-500' : ''
-              }`}
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
+            {navigation.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => {
+                  if (item.onClick) {
+                    item.onClick(); // Call the logout function directly here
+                  } else {
+                    handleNavigation(item.path);
+                  }
+                }}
+                className={`text-sm font-semibold ${
+                  location.pathname === item.path ? 'text-blue-500' : ''
+                }`}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
         </nav>
 
         {/* Mobile Menu */}
