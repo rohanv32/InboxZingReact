@@ -33,10 +33,23 @@ export function UserProvider({ children }) {
   }, [username]);
 
   useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername); // Set username from localStorage
+    }
+  }, []);
+  
+  useEffect(() => {
     if (username) {
-      localStorage.setItem('username', username);
+      localStorage.setItem('username', username); // Keep username in sync with localStorage
     }
   }, [username]);
+
+  useEffect(() => {
+    if (points > 0) {
+      localStorage.setItem('points', points);
+    }
+  }, [points]);
 
   useEffect(() => {
     console.log('Login status changed:', isLoggedIn);
