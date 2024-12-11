@@ -14,19 +14,18 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
 
   const navigation = isLoggedIn
     ? [
-        { name: 'News Feed', path: '/newsfeed' },
-        { name: 'Preferences', path: '/preferences' },
-        { name: 'Delete Account', path: '/deleteuser' },
-        { name: 'Profile', path: '/profile' },
-        { name: 'Podcast', path: '/podcast' },
-        { name: 'Logout', onClick: onLogout },
+        { name: 'News Feed', path: '/newsfeed', emoji: '📰' },
+        { name: 'Preferences', path: '/preferences', emoji: '⚙️' },
+        { name: 'Delete Account', path: '/deleteuser', emoji: '🗑️' },
+        { name: 'Profile', path: '/profile', emoji: '👤' },
+        { name: 'Podcast', path: '/podcast', emoji: '🎙️' },
+        { name: 'Logout', onClick: onLogout, emoji: '🚪' },
       ]
     : [];
 
-  // Handle scroll state
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50); // Adjust the threshold as needed
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -36,10 +35,13 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
     };
   }, []);
 
-  const handleNavigation = (path) => {
-    if (path) {
+  const handleNavigation = (path, onClick) => {
+    if (onClick) {
+      onClick();
+    } else if (path) {
       navigate(path);
     }
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -50,13 +52,11 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
         }`}
       >
         <nav aria-label="Global" className="flex items-center justify-between p-6 lg:px-8">
-          {/* Logo Section */}
           <div className="flex lg:flex-1 items-center">
             <button onClick={onLogoClick} className="-m-1.5 p-1.5">
               <span className="sr-only">Inbox Zing</span>
               <h1 className="text-xl font-bold">Inbox Zing</h1>
             </button>
-            {/* Points Display */}
             {isLoggedIn && (
               <span className="ml-4 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-md">
                 💎 Points: <span>{points}</span>
@@ -64,7 +64,6 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -76,29 +75,21 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
             </button>
           </div>
 
-          {/* Navigation for Large Screens */}
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
               <button
                 key={item.name}
-                onClick={() => {
-                  if (item.onClick) {
-                    item.onClick(); // Call the logout function directly here
-                  } else {
-                    handleNavigation(item.path);
-                  }
-                }}
+                onClick={() => handleNavigation(item.path, item.onClick)}
                 className={`text-sm font-semibold ${
                   location.pathname === item.path ? 'text-blue-500' : ''
-                }`}
+                } hover:text-blue-500 transition-colors duration-200`}
               >
-                {item.name}
+                {item.emoji} {item.name}
               </button>
             ))}
           </div>
         </nav>
 
-        {/* Mobile Menu */}
         <Dialog open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} className="lg:hidden">
           <div className="fixed inset-0 z-50" />
           <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
@@ -122,12 +113,12 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
                   {navigation.map((item) => (
                     <button
                       key={item.name}
-                      onClick={() => handleNavigation(item.path)}
+                      onClick={() => handleNavigation(item.path, item.onClick)}
                       className={`-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50 ${
                         location.pathname === item.path ? 'text-blue-500' : ''
                       }`}
                     >
-                      {item.name}
+                      {item.emoji} {item.name}
                     </button>
                   ))}
                 </div>
@@ -137,7 +128,6 @@ const Header = ({ isLoggedIn, onLogout, onTabChange, onLogoClick }) => {
         </Dialog>
       </header>
 
-      {/* Background Element */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

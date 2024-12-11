@@ -13,7 +13,7 @@
     "antd": "^5.22.4",
     "axios": "^1.7.7",
     "canvas-confetti": "^1.9.3",
-    "framer-motion": "^11.11.17",
+    "framer-motion": "^11.13.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-h5-audio-player": "^3.9.3",
