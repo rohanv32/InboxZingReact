@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUserContext } from './UserContext';
 import '../App.css';
+import Swal from 'sweetalert2';
 
 function NewsFeed({ newsArticles, username }) {
   console.log("Username in NewsFeed:", username);
@@ -65,7 +66,18 @@ function NewsFeed({ newsArticles, username }) {
         const bonusMultiplier = clickCount * 0.1; // Incremental bonus
         earnedPoints = Math.round(basePoints + basePoints * bonusMultiplier);
 
-        alert(`Points earned for this article: ${earnedPoints}`);
+        Swal.fire({
+          title: `🎉 Meow! ${earnedPoints} points earned from reading!`,
+          width: 600,
+          padding: "3em",
+          color: "#716add",
+          backdrop: `
+            rgba(0,0,123,0.4)
+            url("https://media.tenor.com/rI_0O_9AJ5sAAAAj/nyan-cat-poptart-cat.gif")
+            left top
+            no-repeat
+          `
+        });
 
         setClickCount(prev => prev + 1);
         setPoints(prev => prev + earnedPoints);
@@ -84,7 +96,17 @@ function NewsFeed({ newsArticles, username }) {
             setPoints(prev => prev + 20);  // Add the bonus points
         }
     } else {
-        alert("Remember, finish reading an article completely to earn points!");
+        Swal.fire({
+          title: "😸 says...",
+          text: "Finish reading the article, and you'll earn those pawsome points! 🐾",
+          imageUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGNkNmR3eDRtejQ2ODEwNWJlZ2p3Z2xlMXQ2MDRyczQ3Nm1ocm5oaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qUIm5wu6LAAog/giphy.gif", 
+          imageWidth: 400,
+          imageHeight: 200,
+          confirmButtonText: "Alright, I'm on it! 😻",
+          padding: "2em",
+          showCloseButton: true,
+          timer: 5000, // Auto-close after 5 seconds for added excitement
+        });
     }
 
     try {
