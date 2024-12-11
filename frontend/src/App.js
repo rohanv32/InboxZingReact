@@ -26,11 +26,17 @@ function App() {
   const navigate = useNavigate();
  
   // Theme state
-  const [themeMode, setThemeMode] = useState('Light');
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('themeMode') || 'Light';
+  });
 
   // Function to toggle between light and dark mode
   const toggleTheme = () => {
-    setThemeMode((prevMode) => (prevMode === 'Light' ? 'Dark' : 'Light'));
+    setThemeMode((prevMode) => {
+      const newMode = prevMode === 'Light' ? 'Dark' : 'Light';
+      localStorage.setItem('themeMode', newMode);
+      return newMode;
+    });
   };
 
   
