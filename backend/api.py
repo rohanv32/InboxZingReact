@@ -300,10 +300,42 @@ def send_newsfeed_html_email(user_email: str, username: str, html_content: str):
         print(f"Error sending email: {e}")
         return False
 
-
-
-
 @fast_app.post("/signup")
+async def signup(user: UserCreate):
+    # Hash the user's password for security
+    hashed_password = hash_password(user.password)
+
+    # Check if the email already exists in registered users
+    existing_user = users_collection.find_one({"email": user.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered. Please log in, or sign up with a new Email")
+
+    # Check if the username already exists
+    existing_user = users_collection.find_one({"username": user.username})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    # Create the user document
+    new_user = {
+        "username": user.username,
+        "email": user.email,
+        "password": hashed_password,
+        "created_at": datetime.now(),
+        "points": 0,
+        "streak": 0,
+        "last_login": None
+    }
+
+    # Try to insert the new user into the database
+    try:
+        users_collection.insert_one(new_user)
+        return {"message": "Signup successful!"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error during signup: {str(e)}")
+
+
+
+""" @fast_app.post("/signup")
 async def signup(user: UserCreate):
     # Hash the user's password for security
     hashed_password = hash_password(user.password)
@@ -373,7 +405,7 @@ async def verify_confirmation(request: VerifyConfirmationCodeRequest):
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error confirming account: {str(e)}")
     else:
-        raise HTTPException(status_code=400, detail="Invalid confirmation code")
+        raise HTTPException(status_code=400, detail="Invalid confirmation code") """
     
 # # Endpoint to handle logging in a user
 # @fast_app.post("/login")
