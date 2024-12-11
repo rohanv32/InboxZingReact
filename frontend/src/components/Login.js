@@ -40,23 +40,37 @@ function Login({ onLogin, onNavigateToSignUp }) {
         if (userPointsResponse.ok) {
           const userPointsData = await userPointsResponse.json();
           console.log("Fetched user points from server:", userPointsData);
-
-          // Calculate the new points (add login gift points)
-          const updatedPoints = userPointsData.points + 10;
-
-          // Update points on the backend
-          const pointsUpdateResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${formData.username}&points=10`, {
-            method: 'POST',
-          });
-          if (pointsUpdateResponse.ok) {
-            console.log(`10 points added for login. Updated total: ${updatedPoints}`);
-            setPoints(updatedPoints); // Update points in context
+        
+          // Get the last login date and today's date
+          const lastLogin = new Date(data.last_login);
+          const today = new Date();
+        
+          // Reset time portion to midnight for both dates
+          lastLogin.setHours(0, 0, 0, 0);
+          today.setHours(0, 0, 0, 0);
+        
+          // Check if user has logged in today
+          if (lastLogin.getTime() !== today.getTime()) {
+            // Add 10 points only if they haven't logged in today yet
+            const updatedPoints = userPointsData.points + 10;
+        
+            // Update points on the backend
+            const pointsUpdateResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/points/update?username=${formData.username}&points=10`, {
+              method: 'POST',
+            });
+            if (pointsUpdateResponse.ok) {
+              console.log(`10 points added for login. Updated total: ${updatedPoints}`);
+              setPoints(updatedPoints); // Update points in context
+            } else {
+              console.error("Failed to update points on the server.");
+            }
           } else {
-            console.error("Failed to update points on the server.");
+            console.log("User has already logged in today. No points added.");
           }
         } else {
           console.error("Failed to fetch user points from the server.");
         }
+        
 
         try {
           const streakResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/streak/${formData.username}`);
