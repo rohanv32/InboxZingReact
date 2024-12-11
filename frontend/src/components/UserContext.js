@@ -19,7 +19,10 @@ export function UserProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [preferences, setPreferences] = useState(defaultPreferences);
 
-  const [points, setPoints] = useState(0);
+  const [points, setPoints] = useState(() => {
+    const savedPoints = localStorage.getItem('points');
+    return savedPoints ? parseInt(savedPoints, 10) : 0;
+  });
   const [streak, setStreak] = useState(0);
   const [milestone, setMilestone] = useState(false);
   const [doublePoints, setDoublePoints] = useState(false);
@@ -27,6 +30,12 @@ export function UserProvider({ children }) {
   // Log when username or login status changes
   useEffect(() => {
     console.log('Username updated in context:', username);
+  }, [username]);
+
+  useEffect(() => {
+    if (username) {
+      localStorage.setItem('username', username);
+    }
   }, [username]);
 
   useEffect(() => {
