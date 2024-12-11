@@ -153,7 +153,7 @@ function NewsFeed({ newsArticles, username }) {
           </div>
   
           <div className="border border-gray-200 rounded-sm">
-            <div className="bg-[#E8E8E8] p-6">
+            <div className="p-6">
               <p className="text-base leading-relaxed">{selectedArticle.summary}</p>
               
               {selectedArticle.urlToImage && (
@@ -178,7 +178,7 @@ function NewsFeed({ newsArticles, username }) {
               href={selectedArticle.url}
               target="_blank"
               rel="noopener noreferrer" 
-              className="flex-1 bg-[#E8E8E8] rounded-sm py-3 text-center hover:bg-[#dbdbdb] transition-colors"
+              className="flex-1 bg-[#B0B0B0] rounded-sm py-3 text-center hover:bg-[#dbdbdb] transition-colors"
             >
               Go to Source
             </a>

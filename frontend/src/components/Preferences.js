@@ -210,7 +210,7 @@ const renderStep = () => {
               <button
                 key={countryCode}
                 onClick={() => handleSelection('country', countryCode)}
-                className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
                   localPreferences.country === countryCode ? 'border-2 border-[#D5C3C6]' : ''
                 }`}
               >
@@ -235,7 +235,7 @@ const renderStep = () => {
               <button
                 key={category}
                 onClick={() => handleSelection('category', category)}
-                className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
                   localPreferences.category === category ? 'border-2 border-[#D5C3C6]' : ''
                 }`}
               >
@@ -263,7 +263,7 @@ const renderStep = () => {
                 <button
                   key={source.id}
                   onClick={() => handleSelection('source', source.id)}
-                  className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                  className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
                     isSelected ? 'border-2 border-[#D5C3C6]' : ''
                   }`}
                 >
@@ -299,7 +299,7 @@ const renderStep = () => {
                     <button
                       key={style}
                       onClick={() => handleSelection('summaryStyle', style)}
-                      className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                      className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
                         localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6]' : ''
                       }`}
                     >
@@ -319,7 +319,7 @@ const renderStep = () => {
                     <button
                       key={freq}
                       onClick={() => handleSelection('frequency', freq)}
-                      className={`w-full flex items-center bg-[#E8E8E8] rounded-sm py-3 px-4 ${
+                      className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
                         localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6]' : ''
                       }`}
                     >

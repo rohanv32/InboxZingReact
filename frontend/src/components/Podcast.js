@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+
 const Podcast = ({ username }) => {
     const [audioUrl, setAudioUrl] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -31,8 +32,8 @@ const Podcast = ({ username }) => {
     }, [username]);
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
-            <div className="max-w-md w-full p-8 text-center bg-white rounded-lg shadow-md">
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="max-w-md w-full p-8 text-center rounded-lg shadow-md border border-gray-100">
                 <h1 className="text-4xl font-bold mb-8">Podcast for {username}</h1>
                 
                 {isLoading ? (
@@ -48,7 +49,7 @@ const Podcast = ({ username }) => {
                                 Your browser does not support the audio element.
                             </audio>
                         ) : (
-                            <p className="text-gray-500">No audio available</p>
+                            <p>No audio available</p>
                         )}
                     </div>
                 )}

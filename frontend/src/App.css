@@ -22,3 +22,19 @@
 body {
   transition: background-color 0.3s, color 0.3s;
 }
+
+.bg-dark {
+  background-color: #1A1A1A;
+}
+
+.text-light {
+  color: #E8E8E8;
+}
+
+.bg-light {
+  background-color: #FFFFFF;
+}
+
+.text-dark {
+  color: #000000;
+}
