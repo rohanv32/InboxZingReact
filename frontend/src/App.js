@@ -33,7 +33,7 @@ function App() {
     setThemeMode((prevMode) => (prevMode === 'Light' ? 'Dark' : 'Light'));
   };
 
-  // Authenticates the user using their credentials (username and password) and, on success, sets a token or session data.
+  
   const handleLogin = async (credentials) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
@@ -45,14 +45,13 @@ function App() {
         }),
       });
   
-      console.log("Response status:", response.ok);
       if (response.ok) {
         const data = await response.json();
         if (data.username) {
-          console.log("Setting username:", data.username);
           setIsLoggedIn(true);
-          setUsername(data.username);  // Only set username after successful login
-          console.log("Username set in context:", data.username);
+          setUsername(data.username);
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('username', data.username); 
           setActiveTab('NewsFeed');
           navigate('/newsfeed');
         } else {
@@ -63,27 +62,24 @@ function App() {
           });
         }
       } else {
-        const error = await response.json();
         Swal.fire({
           icon: "error",
           title: "Login Error",
           text: "An error occurred during login."
         });
-
       }
     } catch (error) {
-      console.error('Error logging in:', error);  
       Swal.fire({
         icon: "error",
         title: "Login Error",
         text: error.message,
-        footer: "An error occurred while logging in."
       });
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
     setIsLoggedIn(false);
     setUsername(null); // Reset username on logout
     setActiveTab('Home');
@@ -114,19 +110,17 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: userData.username,
-            password: userData.password,  // Assuming you have the password in userData
+            password: userData.password, 
           }),
         });
   
         if (loginResponse.ok) {
           const loginData = await loginResponse.json();
-          // Assuming login returns a token or sets a session cookie
           localStorage.setItem('authToken', loginData.token);
   
-          // Update logged-in state
-          setIsLoggedIn(true);  // Ensure the user is considered logged in
-          setUsername(userData.username);  // Ensure username is set
-          setActiveTab('Preferences');  // Redirect to preferences after signup
+          setIsLoggedIn(true);  
+          setUsername(userData.username);  
+          setActiveTab('Preferences'); 
           navigate('/preferences');
         } else {
           const errorData = await loginResponse.json();
@@ -154,40 +148,18 @@ function App() {
     }
 };
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsLoggedIn(true);  // User is logged in if token exists
-      // You can also fetch the user data here if needed (e.g., username)
-      const fetchUserData = async () => {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUsername(userData.username);
-            setActiveTab('NewsFeed');  // Redirect to the NewsFeed tab after login
-          } else {
-            setActiveTab('Home');  // Default to Home if user data isn't fetched
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      };
-      fetchUserData();
-    } else {
-      setActiveTab('Home');
-      navigate('/');
-    }
-  }, []); // Run only once when component mounts
+useEffect(() => {
+  const token = localStorage.getItem('authToken');
+  const storedUsername = localStorage.getItem('username');
 
-  useEffect(() => {
-    console.log("Active Tab:", activeTab);
-    console.log("Is Logged In:", isLoggedIn);
-    console.log("Is Redirected From Sign Up:", isRedirectedFromSignUp);
-  }, [activeTab, isLoggedIn, isRedirectedFromSignUp]);
+  if (token && storedUsername) {
+    setIsLoggedIn(true);
+    setUsername(storedUsername); 
+  } else {
+    setIsLoggedIn(false);
+  }
+
+}, []);
 
   const handleUpdateComplete = () => {
     navigate('/newsfeed');
@@ -217,35 +189,13 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsLoggedIn(true);
-      const fetchUserData = async () => {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/user`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUsername(userData.username);
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      };
-      fetchUserData();
-    }
-  }, []);
-
   // Dark and Light Mode Algorithm from Ant Design
   const antThemeConfig = {
     algorithm: themeMode === 'Dark' ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
   };
 
   return (
-    <UserProvider> {/* Ensure UserContext is available */}
+    <UserProvider> 
       <ConfigProvider theme={antThemeConfig}>
         <div className={`app ${themeMode === 'Dark' ? 'dark-theme' : 'light-theme'}`}>
           <FloatButton
