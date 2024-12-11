@@ -70,6 +70,7 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
         icon: "error",
         title: "Sign Up Error",
         text: error.message,
+        footer: "Please try again with a different username or email."
       });
     }
   };
