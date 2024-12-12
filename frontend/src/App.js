@@ -204,21 +204,14 @@ useEffect(() => {
     <UserProvider> 
       <ConfigProvider theme={antThemeConfig}>
         <div className={`app ${themeMode === 'Dark' ? 'dark-theme' : 'light-theme'}`}>
-          <FloatButton
-            type="primary"
-            icon={themeMode === 'Light' ? <SunOutlined /> : <MoonOutlined />}
-            onClick={toggleTheme}
-            style={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-            }}
-          />
+          
           <Header
             isLoggedIn={isLoggedIn}
             onLogout={handleLogout}
             onTabChange={handleTabChange}
             onLogoClick={handleLogoClick}
+            themeMode={themeMode}
+            toggleTheme={toggleTheme}
           />
           <Routes>
             <Route path="/" element={<Home onTabChange={handleTabChange}/>} />
