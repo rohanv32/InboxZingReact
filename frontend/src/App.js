@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
@@ -24,17 +24,18 @@ function App() {
   const [isRedirectedFromSignUp, setIsRedirectedFromSignUp] = useState(false);
   const [newsArticles, setNewsArticles] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
  
   // Theme state
   const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('themeMode') || 'Light';
+    return sessionStorage.getItem('themeMode') || 'Light';
   });
 
   // Function to toggle between light and dark mode
   const toggleTheme = () => {
     setThemeMode((prevMode) => {
       const newMode = prevMode === 'Light' ? 'Dark' : 'Light';
-      localStorage.setItem('themeMode', newMode);
+      sessionStorage.setItem('themeMode', newMode);
       return newMode;
     });
   };
@@ -56,8 +57,8 @@ function App() {
         if (data.username) {
           setIsLoggedIn(true);
           setUsername(data.username);
-          localStorage.setItem('authToken', data.token);
-          localStorage.setItem('username', data.username); 
+          sessionStorage.setItem('authToken', data.token);
+          sessionStorage.setItem('username', data.username); 
           setActiveTab('NewsFeed');
           navigate('/newsfeed');
         } else {
@@ -84,8 +85,8 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('username');
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('username');
     setIsLoggedIn(false);
     setUsername(null); // Reset username on logout
     setActiveTab('Home');
@@ -122,7 +123,7 @@ function App() {
   
         if (loginResponse.ok) {
           const loginData = await loginResponse.json();
-          localStorage.setItem('authToken', loginData.token);
+          sessionStorage.setItem('authToken', loginData.token);
   
           setIsLoggedIn(true);  
           setUsername(userData.username);  
@@ -155,30 +156,18 @@ function App() {
 };
 
 useEffect(() => {
-  const token = localStorage.getItem('authToken');
-  const storedUsername = localStorage.getItem('username');
+  const token = sessionStorage.getItem('authToken');
+  const storedUsername = sessionStorage.getItem('username');
 
   if (token && storedUsername) {
     setIsLoggedIn(true);
     setUsername(storedUsername); 
   } else {
     setIsLoggedIn(false);
+    setUsername('');
   }
 
-  const handleTabClose = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('username');
-    setIsLoggedIn(false);
-    setUsername(null);
-  };
-
-  window.addEventListener('beforeunload', handleTabClose);
-
-  return () => {
-     window.removeEventListener('beforeunload', handleTabClose);
-  };
-
-}, []);
+}, [location]);
 
   const handleUpdateComplete = () => {
     navigate('/newsfeed');
@@ -217,16 +206,23 @@ useEffect(() => {
     <UserProvider> 
       <ConfigProvider theme={antThemeConfig}>
         <div className={`app ${themeMode === 'Dark' ? 'dark-theme' : 'light-theme'}`}>
-          
+          <FloatButton
+            type="primary"
+            icon={themeMode === 'Light' ? <SunOutlined /> : <MoonOutlined />}
+            onClick={toggleTheme}
+            style={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+            }}
+          />
           <Header
             isLoggedIn={isLoggedIn}
             onLogout={handleLogout}
             onTabChange={handleTabChange}
             onLogoClick={handleLogoClick}
-            themeMode={themeMode}
-            toggleTheme={toggleTheme}
           />
-          <Routes>
+          <Routes key={location.key}>
             <Route path="/" element={<Home onTabChange={handleTabChange}/>} />
             <Route path="/signup" element={!isLoggedIn ? <SignUp onSignUp={handleSignUp} onNavigateToLogin={handleNavigateToLogin} /> : <Navigate to="/preferences" />} />
             <Route path="/login" element={!isLoggedIn ? <Login onLogin={handleLogin} onNavigateToSignUp={handleNavigateToSignUp}/> : <Navigate to="/newsfeed" />} />
