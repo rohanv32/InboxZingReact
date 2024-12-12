@@ -162,12 +162,17 @@ useEffect(() => {
   if (token && storedUsername) {
     setIsLoggedIn(true);
     setUsername(storedUsername); 
+
+    if (location.pathname === '/') {
+      navigate('/newsfeed');
+    }
+
   } else {
     setIsLoggedIn(false);
   }
 
   
-}, [location]);
+}, [location, navigate]);
 
   const handleUpdateComplete = () => {
     navigate('/newsfeed');
@@ -206,7 +211,6 @@ useEffect(() => {
     <UserProvider> 
       <ConfigProvider theme={antThemeConfig}>
         <div className={`app ${themeMode === 'Dark' ? 'dark-theme' : 'light-theme'}`}>
-
           <Header
             isLoggedIn={isLoggedIn}
             onLogout={handleLogout}
@@ -216,7 +220,7 @@ useEffect(() => {
             toggleTheme={toggleTheme}
           />
           <Routes key={location.key}>
-            <Route path="/" element={<Home onTabChange={handleTabChange}/>} />
+            <Route path="/" element={!isLoggedIn ? <Home onTabChange={handleTabChange}/> : <Navigate to="/newsfeed" />} />
             <Route path="/signup" element={!isLoggedIn ? <SignUp onSignUp={handleSignUp} onNavigateToLogin={handleNavigateToLogin} /> : <Navigate to="/preferences" />} />
             <Route path="/login" element={!isLoggedIn ? <Login onLogin={handleLogin} onNavigateToSignUp={handleNavigateToSignUp}/> : <Navigate to="/newsfeed" />} />
             <Route path="/preferences" element={(isLoggedIn || isRedirectedFromSignUp) ? <Preferences onUpdateComplete={handleUpdateComplete} username={username} /> : <Navigate to="/login" />} />

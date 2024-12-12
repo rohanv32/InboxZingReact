@@ -214,7 +214,7 @@ function Preferences({ onUpdateComplete, username }) {
                   key={category}
                   onClick={() => handleSelection('category', category)}
                   className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                    localPreferences.category === category ? 'border-2 border-[#D5C3C6] bg-gray-100' : ''
+                    localPreferences.category === category ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
                   }`}
                 >
                   {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -236,7 +236,7 @@ function Preferences({ onUpdateComplete, username }) {
                     key={source.id}
                     onClick={() => handleSelection('source', source.id)}
                     className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                      isSelected ? 'border-2 border-[#D5C3C6] bg-gray-100' : ''
+                      isSelected ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
                     }`}
                   >
                     {source.name}
@@ -259,7 +259,7 @@ function Preferences({ onUpdateComplete, username }) {
                       key={style}
                       onClick={() => handleSelection('summaryStyle', style)}
                       className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                        localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6] bg-gray-100' : ''
+                        localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
                       }`}
                     >
                       {style}
@@ -276,7 +276,7 @@ function Preferences({ onUpdateComplete, username }) {
                       key={freq}
                       onClick={() => handleSelection('frequency', freq)}
                       className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                        localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6] bg-gray-100' : ''
+                        localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
                       }`}
                     >
                       {freq} hour(s)

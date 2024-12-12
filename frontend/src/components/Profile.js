@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaSpinner, FaFire, FaBook, FaNewspaper, FaClock } from 'react-icons/fa';
 
 function Profile({ username, onNavigatetoPreferences }) {
   const [preferences, setPreferences] = useState({});
