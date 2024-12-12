@@ -178,7 +178,7 @@ Here are some key pages in the Inbox Zing app:
 
 ## 📚 Usage Guide
 
-1. **Sign Up / Login**: Access the app by signing up for a new account or logging into an existing one.
+1. **Sign Up / Login**: Sign up for a new account or log into an existing account to access the application.
 2. **Customize Preferences**: Choose your preferred news sources, language, location, frequency of updates and summary style.
 3. **View and Manage Feed**: Stay updated with the latest news in a format and frequency that suit your preferences.
 4. **Profile**: Check current user preference setting and user reading statistics.
@@ -199,7 +199,6 @@ Here are some key pages in the Inbox Zing app:
 
 | **Method** | **Endpoint**                    | **Description**                                                    |
 |------------|---------------------------------|--------------------------------------------------------------------|
-| GET        | `/status`                       | To retrieve user login status.                                     |
 | POST       | `/signup`                       | To create a new user.                                              |
 | POST       | `/verify_confirmation`          | To verify user by email.                                           |
 | POST       | `/login`                        | To login user to send email updates.                               |
@@ -209,10 +208,8 @@ Here are some key pages in the Inbox Zing app:
 | GET        | `/news/{username}/statistics`   | To calculate user statistics.                                      |
 | GET        | `/user/{username}`              | To get preferences for profile page display.                       |
 | PUT        | `/user/{username}/password`     | To handle password update.                                         |
-| GET        | `/news_articles/`               | To get all news articles stored in the database.                   |
 | DELETE     | `/user/{username}`              | To delete user and their stored data from the database.            |
 | GET        | `/podcast/{username}`           | To retrieve podcast for the user.                                  |
-| GET        | `/audio/{file_id}`              | To get audio for the podcast.                                      |
 | POST       | `/points/update`                | To update points earned by the user.                               |
 | GET        | `/points/{username}`            | To fetch current points the user has.                              |
 | GET        | `/news_sources`                 | To fetch and process news sources grouped by country and category. |
@@ -223,11 +220,11 @@ Here are some key pages in the Inbox Zing app:
 ## 🗃️ MongoDB Rationale
 
 We chose **MongoDB** for this project due to the following reasons:
-- **Schema Flexibility**: MongoDB allows for dynamic schemas, which is ideal for a news application where user preferences and articles can vary significantly.
+- **Schema Flexibility**: MongoDB allows for dynamic schemas, ideal for a news application where user preferences and articles can vary significantly.
 - **Scalability**: It can handle large volumes of data efficiently, making it suitable for storing numerous articles fetched from various sources.
 - **Performance**: MongoDB's document-oriented structure enables fast data retrieval, which is great for providing users with timely news updates.
 
-Refer to InboxZingDatabase.pdf for the database architecture diagram.
+Please take a look at InboxZingDatabase.pdf for the database architecture diagram.
 
 ---
 
@@ -235,7 +232,7 @@ Refer to InboxZingDatabase.pdf for the database architecture diagram.
 
 - **React Components**: Each React component is modular and reusable, representing distinct UI parts (e.g., news card, preferences, authentication). This structure simplifies maintenance and scaling.
   
-- **Card-Based News Feed**: A card layout enhances readability, allowing users to scan headlines and snippets quickly, with clear options for dismissing articles.
+- **Card-Based News Feed**: A card layout enhances readability, allowing users to scan headlines and snippets, with clear options for dismissing articles.
 
 - **Responsive Design**: Built using CSS media queries and Grid layouts, the app provides a seamless experience across devices.
 
@@ -253,10 +250,10 @@ Refer to InboxZingDatabase.pdf for the database architecture diagram.
 
 ## 🥳 Wireframe
 
-Refer to the Figma link below for a prototype of the application.
+Please refer to the Figma link below for a prototype of the application.
 **Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
 
-Refer to InboxZing (1).pdf for the latest Figma wireframes.
+Refer to 'InboxZing Figma Wireframe and Data Flow Diagram.pdf' for the latest Figma wireframes and Data Flow Chart.
 
 ---
 
