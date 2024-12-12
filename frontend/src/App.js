@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './components/Home';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
@@ -25,7 +25,7 @@ function App() {
   const [newsArticles, setNewsArticles] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
- 
+
   // Theme state
   const [themeMode, setThemeMode] = useState(() => {
     return sessionStorage.getItem('themeMode') || 'Light';
@@ -40,7 +40,7 @@ function App() {
     });
   };
 
-  
+
   const handleLogin = async (credentials) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
@@ -51,7 +51,7 @@ function App() {
           password: credentials.password,
         }),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         if (data.username) {
@@ -109,7 +109,7 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
-  
+
       if (response.ok) {
         // Step 2: Log in the user automatically
         const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
@@ -120,11 +120,11 @@ function App() {
             password: userData.password, 
           }),
         });
-  
+
         if (loginResponse.ok) {
           const loginData = await loginResponse.json();
           sessionStorage.setItem('authToken', loginData.token);
-  
+
           setIsLoggedIn(true);  
           setUsername(userData.username);  
           setActiveTab('Preferences'); 
@@ -164,9 +164,9 @@ useEffect(() => {
     setUsername(storedUsername); 
   } else {
     setIsLoggedIn(false);
-    setUsername('');
   }
 
+  
 }, [location]);
 
   const handleUpdateComplete = () => {
@@ -206,21 +206,14 @@ useEffect(() => {
     <UserProvider> 
       <ConfigProvider theme={antThemeConfig}>
         <div className={`app ${themeMode === 'Dark' ? 'dark-theme' : 'light-theme'}`}>
-          <FloatButton
-            type="primary"
-            icon={themeMode === 'Light' ? <SunOutlined /> : <MoonOutlined />}
-            onClick={toggleTheme}
-            style={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-            }}
-          />
+
           <Header
             isLoggedIn={isLoggedIn}
             onLogout={handleLogout}
             onTabChange={handleTabChange}
             onLogoClick={handleLogoClick}
+            themeMode={themeMode}
+            toggleTheme={toggleTheme}
           />
           <Routes key={location.key}>
             <Route path="/" element={<Home onTabChange={handleTabChange}/>} />
