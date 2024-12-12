@@ -14,218 +14,200 @@ function Preferences({ onUpdateComplete, username }) {
 
   const summaryStyles = ['Detailed', 'Brief', 'ELI5', 'Humorous', 'Storytelling', 'Poetic'];
   const frequencies = [1, 3, 6, 12, 24, 48, 72, 96];
+// added interactivity with the user
+
   const countryCodeMap = {
-    ae: 'United Arab Emirates',
-    ar: 'Argentina',
-    at: 'Austria',
-    au: 'Australia',
-    be: 'Belgium',
-    bg: 'Bulgaria',
-    br: 'Brazil',
-    ca: 'Canada',
-    ch: 'Switzerland',
-    cn: 'China',
-    co: 'Colombia',
-    cu: 'Cuba',
-    cz: 'Czech Republic',
-    de: 'Germany',
-    es: 'Spain',
-    eg: 'Egypt',
-    fr: 'France',
-    gb: 'United Kingdom',
-    gr: 'Greece',
-    hk: 'Hong Kong',
-    hu: 'Hungary',
-    id: 'Indonesia',
-    ie: 'Ireland',
-    il: 'Israel',
-    in: 'India',
-    is: 'Iceland',
-    it: 'Italy',
-    jp: 'Japan',
-    kr: 'South Korea',
-    lt: 'Lithuania',
-    lv: 'Latvia',
-    ma: 'Morocco',
-    mx: 'Mexico',
-    my: 'Malaysia',
-    ng: 'Nigeria',
-    nl: 'Netherlands',
-    no: 'Norway',
-    nz: 'New Zealand',
-    ph: 'Philippines',
-    pk: 'Pakistan',
-    pl: 'Poland',
-    pt: 'Portugal',
-    ro: 'Romania',
-    rs: 'Serbia',
-    ru: 'Russia',
-    sa: 'Saudi Arabia',
-    se: 'Sweden',
-    sg: 'Singapore',
-    si: 'Slovenia',
-    sk: 'Slovakia',
-    th: 'Thailand',
-    tr: 'Turkey',
-    tw: 'Taiwan',
-    ua: 'Ukraine',
-    us: 'United States',
-    ve: 'Venezuela',
-    za: 'South Africa',
-    zh: 'China'
-  };
-  // Fetch data from API on mount
-  useEffect(() => {
-      async function fetchData() {
-          try {
-              const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/news_sources`);
-              const { data, countries } = response.data;
-              setData(data);
-              setCountries(countries);
-              setLocalPreferences((prev) => ({
-                  ...prev,
-                  country: null,
-              }));
-          } catch (error) {
-              console.error('Error fetching data:', error);
-              setError('Failed to fetch news sources. Please try again later.');
-          }
-      }
+    ae: '🇦🇪 United Arab Emirates',
+    ar: '🇦🇷 Argentina',
+    at: '🇦🇹 Austria',
+    au: '🇦🇺 Australia',
+    be: '🇧🇪 Belgium',
+    bg: '🇧🇬 Bulgaria',
+    br: '🇧🇷 Brazil',
+    ca: '🇨🇦 Canada',
+    ch: '🇨🇭 Switzerland',
+    cn: '🇨🇳 China',
+    co: '🇨🇴 Colombia',
+    cu: '🇨🇺 Cuba',
+    cz: '🇨🇿 Czech Republic',
+    de: '🇩🇪 Germany',
+    es: '🇪🇸 Spain',
+    eg: '🇪🇬 Egypt',
+    fr: '🇫🇷 France',
+    gb: '🇬🇧 United Kingdom',
+    gr: '🇬🇷 Greece',
+    hk: '🇭🇰 Hong Kong',
+    hu: '🇭🇺 Hungary',
+    id: '🇮🇩 Indonesia',
+    ie: '🇮🇪 Ireland',
+    il: '🇮🇱 Israel',
+    in: '🇮🇳 India',
+    is: '🇮🇸 Iceland',
+    it: '🇮🇹 Italy',
+    jp: '🇯🇵 Japan',
+    kr: '🇰🇷 South Korea',
+    lt: '🇱🇹 Lithuania',
+    lv: '🇱🇻 Latvia',
+    ma: '🇲🇦 Morocco',
+    mx: '🇲🇽 Mexico',
+    my: '🇲🇾 Malaysia',
+    ng: '🇳🇬 Nigeria',
+    nl: '🇳🇱 Netherlands',
+    no: '🇳🇴 Norway',
+    nz: '🇳🇿 New Zealand',
+    ph: '🇵🇭 Philippines',
+    pk: '🇵🇰 Pakistan',
+    pl: '🇵🇱 Poland',
+    pt: '🇵🇹 Portugal',
+    ro: '🇷🇴 Romania',
+    rs: '🇷🇸 Serbia',
+    ru: '🇷🇺 Russia',
+    sa: '🇸🇦 Saudi Arabia',
+    se: '🇸🇪 Sweden',
+    sg: '🇸🇬 Singapore',
+    si: '🇸🇮 Slovenia',
+    sk: '🇸🇰 Slovakia',
+    th: '🇹🇭 Thailand',
+    tr: '🇹🇷 Turkey',
+    tw: '🇹🇼 Taiwan',
+    ua: '🇺🇦 Ukraine',
+    us: '🇺🇸 United States',
+    ve: '🇻🇪 Venezuela',
+    za: '🇿🇦 South Africa',
+    zh: '🇨🇳 China'
+ };
 
-      fetchData();
-  }, []);
+ // Fetch data from API on mount
+ useEffect(() => {
+   async function fetchData() {
+     try {
+       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/news_sources`);
+       const { data, countries } = response.data;
+       setData(data);
+       setCountries(countries);
+       setLocalPreferences((prev) => ({ ...prev, country: null }));
+     } catch (error) {
+       console.error('Error fetching data:', error);
+       setError('Failed to fetch news sources. Please try again later.');
+     }
+   }
+   fetchData();
+ }, []);
 
-const handleSelection = (field, value) => {
-  setLocalPreferences((prev) => ({
-    ...prev,
-    [field]: value,
-  }));
-  setError('');
+ const handleSelection = (field, value) => {
+   setLocalPreferences((prev) => ({ ...prev, [field]: value }));
+   setError('');
+   if (field === "country") {
+     const countryCategories = Object.keys(data[value] || {});
+     setCategories(countryCategories);
+     setSources([]);
+     setLocalPreferences((prev) => ({ ...prev, category:null,sources:'' }));
+   }
+   if (field === "category") {
+     setSources(data[localPreferences.country]?.[value] || []);
+     setLocalPreferences((prev) => ({ ...prev,sources:'' }));
+   }
+   if (field === "source") {
+     let newSources = localPreferences.sources || '';
+     const selectedSources = newSources.split(',').filter(Boolean);
+     if (!selectedSources.includes(value)) {
+       if (selectedSources.length < 20) {
+         selectedSources.push(value);
+         newSources = selectedSources.join(',');
+         setError('');
+       } else {
+         setError('You can only select up to 20 sources.');
+         return;
+       }
+     } else {
+       const index = selectedSources.indexOf(value);
+       if (index > -1) {
+         selectedSources.splice(index, 1);
+       }
+       newSources = selectedSources.join(',');
+     }
+     setLocalPreferences((prev) => ({ ...prev,sources:newSources }));
+   }
+ };
 
-  if (field === 'country') {
-    const countryCategories = Object.keys(data[value] || {});
-    setCategories(countryCategories);
-    setSources([]);
-    setLocalPreferences((prev) => ({
-      ...prev,
-      category: null,
-      sources: '',
-    }));
-  }
-
-  if (field === 'category') {
-    setSources(data[localPreferences.country]?.[value] || []);
-    setLocalPreferences((prev) => ({
-      ...prev,
-      sources: '',
-    }));
-  }
-
-  if (field === 'source') {
-    let newSources = localPreferences.sources || '';
-    const selectedSources = newSources.split(',').filter(Boolean);
-
-    if (!selectedSources.includes(value)) {
-      if (selectedSources.length < 20) {
-        selectedSources.push(value);
-        newSources = selectedSources.join(',');
-        setError('');
-      } else {
-        setError('You can only select up to 20 sources.');
-        return;
-      }
-    } else {
-      const index = selectedSources.indexOf(value);
-      if (index > -1) {
-        selectedSources.splice(index, 1);
-      }
-      newSources = selectedSources.join(',');
-    }
-
-    setLocalPreferences((prev) => ({
-      ...prev,
-      sources: newSources,
-    }));
-  }
-};
-
-const handleNext = async () => {
-  switch (step) {
-    case 1:
-      if (!localPreferences.country) {
-        setError('Please select a country');
-        return;
-      }
-      break;
-    case 2:
-      if (!localPreferences.category) {
-        setError('Please select a category');
-        return;
-      }
-      break;
-    case 3:
-      const selectedSourcesCount = localPreferences.sources.split(',').filter(Boolean).length;
-      if (selectedSourcesCount === 0) {
-        setError('Please select at least one source');
-        return;
-      }
-      if (selectedSourcesCount > 20) {
-        setError(`You can only select up to 20 sources. You have selected ${selectedSourcesCount} source(s).`);
-        return;
-      }
-      break;
-    case 4:
-      if (!localPreferences.summaryStyle || !localPreferences.frequency) {
-        setError('Please complete all preferences');
-        return;
-      }
-      try {
-        await axios.put(`${process.env.REACT_APP_BACKEND_URL}/preferences/${username}`, {
-          country: localPreferences.country,
-          category: localPreferences.category,
-          sources: localPreferences.sources,
-          summaryStyle: localPreferences.summaryStyle,
-          frequency: localPreferences.frequency,
-        });
-        setPreferences(localPreferences);
-        onUpdateComplete();
-      } catch (error) {
-        console.error('Error updating preferences:', error);
-        setError('Failed to update preferences. Please try again.');
-      }
-      return;
-  }
-  setStep(step + 1);
-  setError('');
-};
+ const handleNext = async () => {
+   switch (step) {
+     case 1:
+       if (!localPreferences.country) {
+         setError('Please select a country');
+         return;
+       }
+       break;
+     case 2:
+       if (!localPreferences.category) {
+         setError('Please select a category');
+         return;
+       }
+       break;
+     case 3:
+       const selectedSourcesCount = localPreferences.sources.split(',').filter(Boolean).length;
+       if (selectedSourcesCount === 0) {
+         setError('Please select at least one source');
+         return;
+       }
+       if (selectedSourcesCount > 20) {
+         setError(`You can only select up to 20 sources. You have selected ${selectedSourcesCount} source(s).`);
+         return;
+       }
+       break;
+     case 4:
+       if (!localPreferences.summaryStyle || !localPreferences.frequency) {
+         setError('Please complete all preferences');
+         return;
+       }
+       try {
+         await axios.put(`${process.env.REACT_APP_BACKEND_URL}/preferences/${username}`, {
+           country : localPreferences.country,
+           category : localPreferences.category,
+           sources : localPreferences.sources,
+           summaryStyle : localPreferences.summaryStyle,
+           frequency : localPreferences.frequency,
+         });
+         setPreferences(localPreferences);
+         onUpdateComplete();
+       } catch (error) {
+         console.error('Error updating preferences:', error);
+         setError('Failed to update preferences. Please try again.');
+       }
+       return;
+   }
+   setStep(step + 1);
+   setError('');
+ };
 
 const renderStep = () => {
   switch (step) {
     case 1:
-      return (
-        <>
-          <h2 className="text-xl text-center mb-8">Select your country</h2>
-          <div className="space-y-3">
-            {countries.map((countryCode) => (
-              <button
-                key={countryCode}
-                onClick={() => handleSelection('country', countryCode)}
-                className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
-                  localPreferences.country === countryCode ? 'border-2 border-[#D5C3C6]' : ''
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full mr-4 ${
-                    localPreferences.country === countryCode ? 'bg-[#D5C3C6]' : 'border-2 border-[#D5C3C6]'
-                  }`}
-                ></div>
-                {countryCodeMap[countryCode] || countryCode.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </>
-      );
-
+     return (
+       <>
+         <h2 className="text-xl text-center mb-8">🌍 Choose your country or region</h2>
+         <div className="space-y-3">
+           {countries.map((countryCode) => (
+             <button
+               key={countryCode}
+               onClick={() => handleSelection('country', countryCode)}
+               className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 ${
+                 localPreferences.country === countryCode ? 
+                 "border-2 border-[#D5C3C6]" : ""
+               }`}
+             >
+               <div className={`w-4 h-4 rounded-full mr-4 ${
+                 localPreferences.country === countryCode ? 
+                 "bg-[#D5C3C6]" : 
+                 "border-2 border-[#D5C3C6]"
+               }`}></div>
+               {countryCodeMap[countryCode]}
+             </button>
+           ))}
+         </div>
+       </>
+     );
+     
     case 2:
       return (
         <>
