@@ -165,6 +165,19 @@ useEffect(() => {
     setIsLoggedIn(false);
   }
 
+  const handleTabClose = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername(null);
+  };
+
+  window.addEventListener('beforeunload', handleTabClose);
+
+  return () => {
+     window.removeEventListener('beforeunload', handleTabClose);
+  };
+
 }, []);
 
   const handleUpdateComplete = () => {
