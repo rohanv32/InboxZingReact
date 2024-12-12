@@ -236,6 +236,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaSpinner, FaFire, FaBook, FaNewspaper, FaClock } from 'react-icons/fa';
+import '../App.css';
 
 function Profile({ username, onNavigatetoPreferences, themeMode }) {
   const [preferences, setPreferences] = useState({});
@@ -420,7 +422,7 @@ function Profile({ username, onNavigatetoPreferences, themeMode }) {
 
   // const containerStyle = isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800';
   // const cardStyle = isDarkMode ? 'bg-gray-800' : 'bg-white';
-  // const buttonStyle = isDarkMode ? 'bg-gray-600 text-gray-100 hover:bg-gray-500' : 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+  // const buttonStyle = isDarkMode ? 'bg-gray-600 text-gray-100 hover:bg-gray-500' : 'border border-gray-400 text-gray-800 hover:bg-gray-300';
   // const inputStyle = isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-800';
   // const textStyle = isDarkMode ? 'text-gray-300' : 'text-gray-700';
 
