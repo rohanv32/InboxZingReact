@@ -259,7 +259,7 @@ function Preferences({ onUpdateComplete, username }) {
                     <button
                       key={style}
                       onClick={() => handleSelection('summaryStyle', style)}
-                      className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 hover:animate-[iconSpin_1s_ease-in-out_infinite] ${
+                      className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 hover:animate-[iconBounce_1s_ease-in-out_infinite] ${
                         localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                       }`}
                     >
