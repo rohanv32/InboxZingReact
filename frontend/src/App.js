@@ -63,23 +63,23 @@ function App() {
         } else {
           Swal.fire({
             icon: "error",
-            title: "Login Error",
-            text: "Login failed. No username in response."
-          });
+            title: "Yikes! 🐾",
+            text: "Login failed—looks like the username took a catnap! 😺 Please try again.",
+          });          
         }
       } else {
         Swal.fire({
           icon: "error",
-          title: "Login Error",
-          text: "An error occurred during login."
-        });
+          title: "Oh no! 🐾",
+          text: "Something went wrong during login. Looks like a tech gremlin is loose! 😿 Try again soon.",
+        });        
       }
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Login Error",
-        text: error.message,
-      });
+        title: "Oops! 🐾",
+        text: `${error.message}. Looks like the login portal’s a bit grumpy! 😿 Try again!`,
+      });      
     }
   };
 
@@ -94,8 +94,11 @@ function App() {
 
   const handleDeleteAccount = async () => {
       Swal.fire({
-        icon: "warning",
-        title: "User deleted!",
+        title: "Whoops! 🐾 User deleted!",
+        text: "The digital cat struck again!",
+        imageUrl: "https://media.tenor.com/iVVi-enilPAAAAAM/sound-the-car-alarm-cat.gif",
+        imageWidth: 400,
+        imageHeight: 300,
       });
       handleLogout();
   };
@@ -132,25 +135,25 @@ function App() {
           const errorData = await loginResponse.json();
           Swal.fire({
             icon: "error",
-            title: "Oops...",
-            text: "Login failed: ${errorData.detail || 'Unknown error'}",
-          });
+            title: "Uh-oh! 🐾",
+            text: `Login failed: ${errorData.detail || 'The tech gremlins are at it again! 😿'} Please try again!`
+          });          
         }
       } else {
         const errorData = await response.json();
         Swal.fire({
           icon: "error",
-          title: "Oops...",
-          text: "Signup failed: ${errorData.detail || 'Unknown error'}",
-        });
+          title: "Uh-oh! 🐾",
+          text: `Signup failed: ${errorData.detail || 'The digital kittens are having a nap! 😿'} Try again!`
+        });        
       }
     } catch (error) {
       console.error('Error during signup or login:', error);
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "An error occurred during signup.",
-      });
+        title: "Oops... 🐾",
+        text: "Something went wrong during signup. Looks like the cats knocked over the code! 😿 Try again."
+      });      
     }
 };
 

@@ -24,9 +24,9 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
       setError("Passwords do not match.");
       Swal.fire({
         icon: "error",
-        title: "Passwords do not match.",
-        text: "Please check your passwords and try again.",
-      });
+        title: "Uh-oh! 🐾",
+        text: "Your passwords are having a disagreement. Double-check and try again!",
+      });      
       return;
     }
 
@@ -54,9 +54,9 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
       const result = await response.json();
       Swal.fire({
         icon: "success",
-        title: "Sign Up Successful",
-        text: result.message
-      });
+        title: "🎉 You're in! 🐾",
+        text: `${result.message} Time to explore and shine!`,
+      });      
 
       // Set the username in UserContext
       setUsername(formData.username);
@@ -97,10 +97,10 @@ function SignUp({ onSignUp, onNavigateToLogin }) {
       setError(error.message);
       Swal.fire({
         icon: "error",
-        title: "Sign Up Error",
-        text: error.message,
-        footer: "Please try again with a different username or email."
-      });
+        title: "Oops! 🐾",
+        text: `${error.message}`,
+        footer: "Don't worry, try again with a different username or email. You've got this! 😺"
+      });      
     }
   };
 

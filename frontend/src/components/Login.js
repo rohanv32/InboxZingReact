@@ -29,9 +29,11 @@ function Login({ onLogin, onNavigateToSignUp }) {
         const data = await response.json();
         console.log("Login success response data:", data);
         Swal.fire({
-          title: "Welcome back!",
-          text: data.message,
-          icon: "success"
+          title: "Meow-velous to see you! 🐾",
+          text: "Stay curious and catch today’s top stories! 🐱✨",
+          imageUrl: "https://media.tenor.com/yasH25NcmgUAAAAM/cat-anime.gif",
+          imageWidth: 400,
+          imageHeight: 300,
         });
         await onLogin(formData);
 
@@ -92,18 +94,20 @@ function Login({ onLogin, onNavigateToSignUp }) {
         console.error("Login error response:", error);
         Swal.fire({
           icon: "error",
-          title: "Login Error",
+          title: "Oops! 🐾",
           text: error.message,
-          footer: "Please try again with a different username or sign up."
+          footer: "Looks like a curious kitty got into the code! 😺 Try again with a different username or sign up."
         });
+        
       }
     } catch (err) {
       console.error("An error occurred:", err);
       Swal.fire({
-        icon: "error",
-        title: "Login Error",
-        text: err.message,
-        footer: "An error occurred during login. Please try again later."
+        title: "Uh-oh, the purr-blem is real! 🐾", err,
+        text: "Something went wrong, please try again in a whisker moment..",
+        imageUrl: "https://media1.tenor.com/m/fAKIFrYkfpAAAAAd/sad-sad-cat.gif",
+        imageWidth: 400,
+        imageHeight: 300,
       });
     }
   };
@@ -124,10 +128,10 @@ function Login({ onLogin, onNavigateToSignUp }) {
         onSubmit={() => Swal.fire({
           position: "top-end",
           icon: "success",
-          title: "Verification email sent!",
+          title: "🎉 Pawsome! Verification email sent! 🐾",
           showConfirmButton: false,
           timer: 1500
-        })}
+        })}        
         notification={"Please check your email for further instructions."}
         onBack={handleBackToLogin}
       />
