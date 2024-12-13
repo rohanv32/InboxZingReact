@@ -219,11 +219,18 @@ function NewsFeed({ newsArticles, username }) {
         <div className="space-y-4">
           {articles.length > 0 ? (
             articles.map((article, index) => (
-              <div
-                key={index}
-                onClick={() => handleArticleClick(article)}
-                className={`flex ${index % 2 === 0 ? '' : 'flex-row-reverse'} cursor-pointer`}
-              >
+            <div 
+              key={index} 
+              onClick={() => handleArticleClick(article)} 
+              className={`
+                flex 
+                ${index % 2 === 0 ? '' : 'flex-row-reverse'} 
+                cursor-pointer
+                transform transition-all duration-300 ease-out
+                hover:scale-[1.05] hover:shadow-lg
+                hover:-translate-y-1
+              `}
+            >
                 <div className="w-1/2 p-4 border border-gray-400">
                   <h3 className="font-semibold mb-2">{article.title}</h3>
                   <p className="text-sm">{article.description}</p>
