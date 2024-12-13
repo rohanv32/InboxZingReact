@@ -44,7 +44,7 @@ export function UserProvider({ children }) {
   useEffect(() => {
     // username kept syncing with local storage
     if (username) {
-      localStorage.setItem('username', username); e
+      localStorage.setItem('username', username);
     }
   }, [username]);
 
