@@ -248,77 +248,18 @@ def export_newsfeed_as_html(articles, username):
     <!DOCTYPE html>
     <html>
     <head>
-        <title>{username}'s Personalized News Feed</title>
+        <title>Inbox Zing - News Feed</title>
         <style>
-            body {{
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f9;
-            }}
-            .container {{
-                padding: 20px;
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }}
-            .header {{
-                text-align: center;
-                font-size: 28px;
-                font-weight: bold;
-                color: #4A90E2;
-                margin-bottom: 20px;
-            }}
-            .subheader {{
-                text-align: center;
-                font-size: 16px;
-                color: #555555;
-                margin-bottom: 30px;
-            }}
-            .article {{
-                margin-bottom: 20px;
-                padding: 15px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                background-color: #fafafa;
-            }}
-            .article h2 {{
-                font-size: 20px;
-                color: #333333;
-                margin-bottom: 10px;
-            }}
-            .article img {{
-                max-width: 100%;
-                height: auto;
-                border-radius: 8px;
-                margin-bottom: 10px;
-            }}
-            .article p {{
-                font-size: 14px;
-                color: #555555;
-                margin-bottom: 10px;
-            }}
-            .article a {{
-                display: inline-block;
-                text-decoration: none;
-                color: #ffffff;
-                background-color: #4A90E2;
-                padding: 8px 12px;
-                border-radius: 5px;
-                font-size: 14px;
-                font-weight: bold;
-            }}
-            .article a:hover {{
-                background-color: #357ABD;
-            }}
-            .footer {{
-                text-align: center;
-                font-size: 12px;
-                color: #777777;
-                margin-top: 20px;
-            }}
+            body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }}
+            .container {{ max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }}
+            .header {{ font-size: 28px; font-weight: bold; color: #333; text-align: center; margin-bottom: 10px; }}
+            .subheader {{ font-size: 16px; color: #555; text-align: center; margin-bottom: 20px; }}
+            .article {{ margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }}
+            .article h2 {{ font-size: 22px; color: #000; font-weight: bold; margin-bottom: 10px; line-height: 1.4; }}
+            .article img {{ max-width: 100%; height: auto; margin-bottom: 10px; border-radius: 5px; }}
+            .article p {{ font-size: 14px; color: #555; line-height: 1.6; }}
+            .article a {{ text-decoration: none; color: #007BFF; font-weight: bold; font-size: 14px; }}
+            .footer {{ text-align: center; font-size: 12px; color: #999; margin-top: 20px; }}
         </style>
     </head>
     <body>
@@ -335,15 +276,13 @@ def export_newsfeed_as_html(articles, username):
                 </div>
                 ''' for article in articles[:10] 
             )}
-            <div class="footer">
-                You're receiving this email as part of your Inbox Zing subscription. 
-                <br>Want to customize your preferences? Visit your <a href=""https://inboxzing-frontend-739742167446.us-central1.run.app/preferences">profile</a>.
-            </div>
+            <div class="footer">Inbox Zing &copy; 2024. All rights reserved.</div>
         </div>
     </body>
     </html>
     """
     return html_content
+
 
 
 def send_newsfeed_html_email(user_email: str, username: str, html_content: str):
