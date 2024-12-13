@@ -17,7 +17,7 @@ body {
 /* News Feed Background Styles added */
 .news-feed-background {
   background-color: #F1F1F1; 
-
+}
 
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
