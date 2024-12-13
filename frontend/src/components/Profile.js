@@ -187,6 +187,12 @@ function Profile({ username, onNavigatetoPreferences, themeMode }) {
                     }
                   } else if (key === 'country') {
                     displayValue = countryCodeMap[value.toLowerCase()] || value.toString().toUpperCase();
+                  } else if (key === 'frequency') {
+                    if (value.toString()==="1"){
+                      displayValue = value.toString()+" hour";
+                    }else{
+                      displayValue = value.toString()+" hours";
+                    }
                   } else {
                     displayValue = value.toString().charAt(0).toUpperCase() + value.toString().slice(1);
                   }
@@ -208,33 +214,37 @@ function Profile({ username, onNavigatetoPreferences, themeMode }) {
               <div className="grid gap-2">
                 <div className="flex items-center justify-between p-2 border border-gray-400 rounded">
                   <div className="flex items-center">
-                    <FaBook/>
+                    <FaBook className="mr-2 hover:animate-[iconSpin_1s_ease-in-out]"/>
                     <span className="font-medium">Articles Read:</span>
                   </div>
                   <span>{statistics.articlesRead || 0}</span>
                 </div>
+                
                 <div className="flex items-center justify-between p-2 border border-gray-400 rounded">
                   <div className="flex items-center">
-                    <FaNewspaper/>
+                    <FaNewspaper className="mr-2 hover:animate-[iconBounce_1s_ease-in-out_infinite]"/>
                     <span className="font-medium">Articles Left to Read:</span>
                   </div>
                   <span>{statistics.articlesLeft || 0}</span>
                 </div>
+                
                 <div className="flex items-center justify-between p-2 border border-gray-400 rounded">
                   <div className="flex items-center">
-                    <FaClock/>
+                    <FaClock className="mr-2 hover:animate-[iconSpin_2s_linear_infinite]"/>
                     <span className="font-medium">Time Spent Reading (seconds):</span>
                   </div>
                   <span>{statistics.readingTime || 0}</span>
                 </div>
+                
                 <div className="flex items-center justify-between p-2 border border-gray-400 rounded">
                   <div className="flex items-center">
-                    <FaFire/>
+                    <FaFire className="mr-2 hover:animate-[iconPulse_1s_ease-in-out_infinite]"/>
                     <span className="font-medium">Current Streak:</span>
                   </div>
                   <span>{streak || 0}</span>
                 </div>
               </div>
+
             </div>
 
             <button
