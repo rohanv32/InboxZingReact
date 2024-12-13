@@ -4,6 +4,8 @@ Welcome to **Inbox Zing!** 🎉 This React-based application is designed to brin
 
 Click here for the link to the application: https://inboxzing-frontend-739742167446.us-central1.run.app
 
+Alternatively, follow the steps under the **Installation & Setup** Section below to run the application locally.
+
 ---
 
 ## 👥 Team Members
