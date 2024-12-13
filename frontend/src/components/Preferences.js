@@ -190,7 +190,7 @@ function Preferences({ onUpdateComplete, username }) {
                   key={countryCode}
                   onClick={() => handleSelection('country', countryCode)}
                   className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                    localPreferences.country === countryCode ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
+                    localPreferences.country === countryCode ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                   }`}
                 >
                   <div
@@ -214,7 +214,7 @@ function Preferences({ onUpdateComplete, username }) {
                   key={category}
                   onClick={() => handleSelection('category', category)}
                   className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                    localPreferences.category === category ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
+                    localPreferences.category === category ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                   }`}
                 >
                   {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -236,7 +236,7 @@ function Preferences({ onUpdateComplete, username }) {
                     key={source.id}
                     onClick={() => handleSelection('source', source.id)}
                     className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                      isSelected ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
+                      isSelected ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                     }`}
                   >
                     {source.name}
@@ -259,7 +259,7 @@ function Preferences({ onUpdateComplete, username }) {
                       key={style}
                       onClick={() => handleSelection('summaryStyle', style)}
                       className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                        localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
+                        localPreferences.summaryStyle === style ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                       }`}
                     >
                       {style}
@@ -276,7 +276,7 @@ function Preferences({ onUpdateComplete, username }) {
                       key={freq}
                       onClick={() => handleSelection('frequency', freq)}
                       className={`w-full flex items-center border border-gray-300 rounded-sm py-3 px-4 transition-colors duration-200 ${
-                        localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6] bg-gray-200 dark:bg-gray-400' : ''
+                        localPreferences.frequency === freq ? 'border-2 border-[#D5C3C6] bg-[#D5C3C6] text-black' : ''
                       }`}
                     >
                       {freq} hour(s)
