@@ -106,24 +106,25 @@ def verify_password(stored_password: str, provided_password: str) -> bool:
 
 def fetch_news(preferences: UserPreferences) -> List[dict]:
     articles = []
-    page = 1  
-    while len(articles) < 10:  
+    page = 1  # Start fetching from the first page
+    while len(articles) < 10:  # Keep fetching until we have 10 articles
         params = {
             'apiKey': NEWS_API_KEY,
-            'sources': preferences.sources,  
-            'pageSize': 10,  
-            'page': page  
+            'sources': preferences.sources,  # Use the sources parameter
+            'pageSize': 10,  # Fetch 10 articles per request
+            'page': page  # Fetch the next page
         }
         response = requests.get(NEWS_API_URL, params=params)
         
         if response.status_code == 200:
             new_articles = response.json().get('articles', [])
             
-            # Articles filtered to ensure complete data and stopped if 10 reached
+            # Filter articles to ensure they have complete data
             for article in new_articles:
                 if all(key in article and article[key] for key in ['title', 'description', 'urlToImage', 'content']):
                     articles.append(article)
                 
+                # Stop if we already have 10 complete articles
                 if len(articles) >= 10:
                     break
         page += 1  # Move to the next page
@@ -132,7 +133,6 @@ def fetch_news(preferences: UserPreferences) -> List[dict]:
             break
     return articles[:10]
 
-# promopts added for summarization 
 def summarize_article(article: dict, summary_style: str) -> str:
     content = article.get("content") or article.get("title") or "No content or title available."
     if summary_style == "Brief":
@@ -243,29 +243,19 @@ def send_confirmation_email(user_email: str, confirmation_code: str):
         print(f"Error sending email: {e}")
         return False
 
-def export_newsfeed_as_html(articles, username):
+def export_newsfeed_as_html(articles):
     html_content = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <title>Inbox Zing - News Feed</title>
         <style>
-            body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }}
-            .container {{ max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }}
-            .header {{ font-size: 28px; font-weight: bold; color: #333; text-align: center; margin-bottom: 10px; }}
-            .subheader {{ font-size: 16px; color: #555; text-align: center; margin-bottom: 20px; }}
-            .article {{ margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }}
-            .article h2 {{ font-size: 22px; color: #000; font-weight: bold; margin-bottom: 10px; line-height: 1.4; }}
-            .article img {{ max-width: 100%; height: auto; margin-bottom: 10px; border-radius: 5px; }}
-            .article p {{ font-size: 14px; color: #555; line-height: 1.6; }}
-            .article a {{ text-decoration: none; color: #007BFF; font-weight: bold; font-size: 14px; }}
-            .footer {{ text-align: center; font-size: 12px; color: #999; margin-top: 20px; }}
+            /* Your existing styles */
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="header">Hi {username}, Here's Your Personalized News Feed</div>
-            <div class="subheader">Curated just for you. Stay informed and up-to-date!</div>
+            <div class="header">Your Personalized News Feed</div>
             {"".join(
                 f'''
                 <div class="article">
@@ -274,9 +264,8 @@ def export_newsfeed_as_html(articles, username):
                     <p>{article['summary']}</p>
                     <a href="{article['url']}" target="_blank">Read More</a>
                 </div>
-                ''' for article in articles[:10] 
+                ''' for article in articles
             )}
-            <div class="footer">Inbox Zing &copy; 2024. All rights reserved.</div>
         </div>
     </body>
     </html>
@@ -285,14 +274,14 @@ def export_newsfeed_as_html(articles, username):
 
 
 
+
+
 def send_newsfeed_html_email(user_email: str, username: str, html_content: str):
+    # Get SendGrid API Key from environment
     sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
     sendgrid_email = os.getenv('SENDGRID_FROM_EMAIL')
 
-    if not sendgrid_api_key or not sendgrid_email:
-        print("SendGrid API Key or From Email is not configured.")
-        return False
-
+    # Create email with HTML content
     message = Mail(
         from_email=sendgrid_email,
         to_emails=user_email,
@@ -301,15 +290,14 @@ def send_newsfeed_html_email(user_email: str, username: str, html_content: str):
     )
 
     try:
+        # Send the email
         sg = SendGridAPIClient(sendgrid_api_key)
         response = sg.send(message)
-        if response.status_code not in (200, 202):
-            print(f"SendGrid Error: {response.status_code} - {response.body}")
-        return response.status_code in (200, 202)
+        print(f"Email sent to {user_email}. Status Code: {response.status_code}")
+        return True
     except Exception as e:
-        print(f"Error sending email: {str(e)}")
+        print(f"Error sending email: {e}")
         return False
-
 
 @fast_app.post("/signup")
 async def signup(user: UserCreate):
@@ -442,7 +430,6 @@ async def verify_confirmation(request: VerifyConfirmationCodeRequest):
 #         return JSONResponse(content={"message": "Login successful", "username": user.username})
 #         # if error display this message
 #     raise HTTPException(status_code=401, detail="Invalid username or password")
-
 @fast_app.post("/login")
 async def login(user: UserLogin):
     db_user = users_collection.find_one({"username": user.username})
@@ -451,65 +438,63 @@ async def login(user: UserLogin):
         now = datetime.now()
         last_login = db_user.get("last_login")
         streak = db_user.get("streak", 0)
-
-        # Fetch news articles and send email every login
-        try:
-            # Use the existing get_news function to fetch articles
-            news_response = await get_news(user.username)
-            articles = news_response.get("articles", [])
-
-            if articles:
-                summarized_articles = []
-                for article in articles:
-                    summary = article.get('summary', 'No summary available')
-                    source_name = article.get('source', 'Unknown Source')
-                    summarized_articles.append({
-                        "title": article['title'],
-                        "source": source_name,
-                        "description": article['description'],
-                        "url": article['url'],
-                        "published_at": article.get('publishedAt'),
-                        "urlToImage": article.get('urlToImage'),
-                        "summary": summary,
-                        "isRead": False
-                    })
-
-                # Export news feed as HTML
-                html_content = export_newsfeed_as_html(summarized_articles)
-
-                # Send the HTML email
-                email_sent = send_newsfeed_html_email(
-                    user_email=db_user["email"],
-                    username=user.username,
-                    html_content=html_content
-                )
-
-                # Update last email sent time if email was sent successfully
-                if email_sent:
-                    users_collection.update_one(
-                        {"username": user.username},
-                        {"$set": {"last_email_sent": now}}
-                    )
-
-        except Exception as e:
-            print(f"Error processing news for email: {e}")
-
-        # Handle streak and last login update
+        # Check if preferences exist and frequency is set
+        if "preferences" in db_user and "frequency" in db_user["preferences"]:
+            # Check if it's time to send an email
+            last_email_sent = db_user.get("last_email_sent")
+            frequency_hours = db_user["preferences"]["frequency"]
+            # If no last email sent or time since last email exceeds frequency
+            if not last_email_sent or (now - last_email_sent).total_seconds() / 3600 >= frequency_hours:
+                # Fetch news articles
+                try:
+                    # Use the existing get_news function to fetch articles
+                    news_response = await get_news(user.username)
+                    articles = news_response.get("articles", [])
+                    # Send email if articles exist
+                    if articles:
+                        summarized_articles = []
+                        for article in articles:
+                            summary = article.get('summary', 'No summary available')
+                            source_name = article.get('source', 'Unknown Source')
+                            summarized_articles.append({
+                                "title": article['title'],
+                                "source": source_name,
+                                "description": article['description'],
+                                "url": article['url'],
+                                "published_at": article.get('publishedAt'),
+                                "urlToImage": article.get('urlToImage'),
+                                "summary": summary,
+                                "isRead": False
+                            })
+                         # Export news feed as HTML
+                        html_content = export_newsfeed_as_html(summarized_articles)
+                        # Send the HTML email
+                        email_sent = send_newsfeed_html_email(
+                            user_email=db_user["email"],
+                            username=user.username,
+                            html_content=html_content
+                        )
+                        # Update last email sent time if email was sent successfully
+                        if email_sent:
+                            users_collection.update_one(
+                                {"username": user.username},
+                                {"$set": {"last_email_sent": now}}
+                            )
+                except Exception as e:
+                    print(f"Error processing news for email: {e}")
         if last_login:
             last_login_date = last_login.date()
             if now.date() == last_login_date + timedelta(days=1):
-                streak += 1  # Increment streak for consecutive days
+                streak += 1  
             elif now.date() > last_login_date + timedelta(days=1):
-                streak = 0  # Reset streak for missed days
-
+                streak = 0 
         # Update last_login and streak
         users_collection.update_one(
             {"username": user.username},
             {"$set": {"last_login": now, "streak": streak}}
         )
-
         return JSONResponse(content={"message": "Login successful", "username": user.username})
-
+    
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
 # Endpoint to handle modifying of previously set user preferences
@@ -650,12 +635,12 @@ async def get_news_statistics(username: str):
     if not user_news_doc:
         raise HTTPException(status_code=404, detail="No news data found for this user")
     
-    # Reading stats calculated 
+    # Calculate statistics
     total_articles = len(user_news_doc["articles"])
     read_articles = sum(1 for article in user_news_doc["articles"] if article["isRead"])
     unread_articles = total_articles - read_articles
     
-    # Calculate total time spent in seconds 
+    # Calculate total time spent (assuming each article has a 'timeSpent' field in seconds)
     total_time_spent = sum(article.get("readingTime", 0) for article in user_news_doc["articles"])
     return {
         "articlesRead": read_articles,
@@ -731,7 +716,7 @@ async def generate_podcast_script(articles, summary_style, username):
     if not isinstance(articles, list) or not articles:
         print("No articles or invalid structure provided.")
         raise HTTPException(status_code=500, detail="No articles found or invalid article structure.")
-    # best enhanced prompt reached after trial and error that gives best tone, summary for user
+    
     try:
         news_content = ""
         for idx, article in enumerate(articles, 1):
@@ -757,7 +742,7 @@ async def generate_podcast_script(articles, summary_style, username):
             f" End on an uplifting note, urging {username} to stay curious and motivated.\n"
             f"Ensure the podcast fits within 2 minutes (~300 words), sounds like it’s delivered by a charismatic and lively host."
         )
-        
+        # OpenAI API call using the updated syntax
         response = openai.chat.completions.create(
             model="gpt-3.5-turbo", 
             messages=[
@@ -768,7 +753,7 @@ async def generate_podcast_script(articles, summary_style, username):
             temperature=0.7
         )
         podcast_text = response.choices[0].message.content.strip()
-        #print("Generated Podcast Script:", podcast_text)(debugging stage)
+        #print("Generated Podcast Script:", podcast_text)
         return podcast_text
     except Exception as e:
         print("Error during podcast script generation:", e)
@@ -777,6 +762,7 @@ async def generate_podcast_script(articles, summary_style, username):
 async def generate_podcast_audio(script):
     try:
         
+        # OpenAI API for text-to-speech (TTS)
         response = openai.audio.speech.create(
             model="tts-1",
             voice="alloy", 
@@ -792,7 +778,7 @@ async def generate_podcast_audio(script):
         print("Error during TTS conversion:", e)
         raise HTTPException(status_code=500, detail="An error occurred while converting text to speech.")
 
-# Storing audio directly into GridFS(deployment technique)
+# Storing audio directly into GridFS
 async def store_audio_to_gridfs(audio_data, username):
     try:
         print(f"Storing audio of size: {len(audio_data)} bytes")
@@ -960,11 +946,11 @@ async def get_streak(username: str):
         raise HTTPException(status_code=404, detail="User not found")
     return {"streak": user.get("streak", 0)}
 
-REACT_APP_FRONTEND_URL = os.getenv("REACT_APP_FRONTEND_URL", "http://localhost:3000")  
+REACT_APP_FRONTEND_URL = os.getenv("REACT_APP_FRONTEND_URL", "http://localhost:3000")  # default to localhost if not set
 PORT = int(os.getenv("PORT", 8000))
 fast_app.add_middleware(
     CORSMiddleware,
-    allow_origins=[REACT_APP_FRONTEND_URL],  
+    allow_origins=[REACT_APP_FRONTEND_URL],  # Adjust if your frontend is hosted elsewhere
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
