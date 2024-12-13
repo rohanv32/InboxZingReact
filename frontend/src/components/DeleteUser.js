@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Use useNavigate instead of useHistory
+import { useNavigate } from 'react-router-dom';  
 
+// rediraection hook maintained by useNavigate
 function DeleteUser({ onDelete, username }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  // useNavigate hook for redirection
+  const navigate = useNavigate();  
 
-  // Function to handle the delete button click and trigger the API request
+  // delete button handaling functiona and triggers the API
   const handleDelete = async () => {
     try {
       setLoading(true);
@@ -23,15 +24,15 @@ function DeleteUser({ onDelete, username }) {
         throw new Error('Failed to delete user');
       }
 
-      // Assuming onDelete is a function to handle the state after successful deletion
+
       onDelete();
 
       // Log the user out by clearing session or localStorage or cookies
       // Clear user session or authentication tokens here
-      localStorage.removeItem('authToken');  // Example: removing auth token from localStorage
-      sessionStorage.removeItem('authToken'); // Example: removing auth token from sessionStorage
+      localStorage.removeItem('authToken');  
+      sessionStorage.removeItem('authToken'); 
 
-      // Redirect to login or home page after account deletion
+      // Redirected to Login/sign up page
       navigate('/'); // Using navigate instead of history.push
 
     } catch (err) {
