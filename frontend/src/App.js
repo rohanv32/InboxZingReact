@@ -1,3 +1,4 @@
+// all required imports for front end
 import React, { useState, useEffect, useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from './components/Home';
@@ -13,10 +14,10 @@ import Podcast from './components/Podcast'
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FloatButton, ConfigProvider, theme as antTheme } from 'antd';
-import { MoonOutlined, SunOutlined } from '@ant-design/icons'; // Add icons for light/dark mode
+import { MoonOutlined, SunOutlined } from '@ant-design/icons';
 
 function App() {
-  const context = useUserContext();  // Get context from the UserProvider
+  const context = useUserContext();  
   const username = context ? context.username : '';
   const setUsername = context ? context.setUsername : () => {};
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,13 +26,11 @@ function App() {
   const [newsArticles, setNewsArticles] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Theme state
   const [themeMode, setThemeMode] = useState(() => {
     return sessionStorage.getItem('themeMode') || 'Light';
   });
 
-  // Function to toggle between light and dark mode
+  // To be able to switch between light and dark mode themes 
   const toggleTheme = () => {
     setThemeMode((prevMode) => {
       const newMode = prevMode === 'Light' ? 'Dark' : 'Light';
@@ -40,7 +39,7 @@ function App() {
     });
   };
 
-
+// login and error messages 
   const handleLogin = async (credentials) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
@@ -88,7 +87,7 @@ function App() {
     sessionStorage.removeItem('authToken');
     sessionStorage.removeItem('username');
     setIsLoggedIn(false);
-    setUsername(null); // Reset username on logout
+    setUsername(null); 
     setActiveTab('Home');
     navigate('/');
   };
@@ -103,7 +102,7 @@ function App() {
 
   const handleSignUp = async (userData) => {
     try {
-      // Step 1: Sign up the user
+      // Sign up the user
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,7 +110,7 @@ function App() {
       });
 
       if (response.ok) {
-        // Step 2: Log in the user automatically
+        // Log in the user automatically
         const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -202,7 +201,7 @@ useEffect(() => {
     }
   };
 
-  // Dark and Light Mode Algorithm from Ant Design
+  // Ant algorithim set up
   const antThemeConfig = {
     algorithm: themeMode === 'Dark' ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
   };

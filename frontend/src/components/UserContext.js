@@ -1,3 +1,5 @@
+// required imports made
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
@@ -9,7 +11,7 @@ export const defaultPreferences = {
   frequency: 24,
 };
 
-// User context created to be accessible in the app
+// User context intiated
 export const UserContext = createContext();
 
 // UserProvider component to provide the user state to the app
@@ -35,13 +37,14 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
-      setUsername(storedUsername); // Set username from localStorage
+      setUsername(storedUsername);
     }
   }, []);
   
   useEffect(() => {
+    // username kept syncing with local storage
     if (username) {
-      localStorage.setItem('username', username); // Keep username in sync with localStorage
+      localStorage.setItem('username', username); e
     }
   }, [username]);
 
@@ -55,22 +58,22 @@ export function UserProvider({ children }) {
     console.log('Login status changed:', isLoggedIn);
   }, [isLoggedIn]);
 
-  // Toggle double points on weekends
+  // double points on weekends feature
   useEffect(() => {
     const day = new Date().getDay();
-    setDoublePoints(day === 6 || day === 0); // Saturday or Sunday
+    setDoublePoints(day === 6 || day === 0); 
   }, []);
 
-  // Handle earning points
+  // Earning points handeler
   const earnPoints = () => {
-    let earnedPoints = 10; // Base points
+    let earnedPoints = 10; // Base points and then incremeneted
 
     // Apply streak bonus: +10% per day in a streak, max 50%
     if (streak > 0) {
       earnedPoints += Math.min(streak, 5) * 0.1 * earnedPoints;
     }
 
-    // Apply double points
+    // double points feature
     if (doublePoints) {
       earnedPoints *= 2;
     }
@@ -78,7 +81,7 @@ export function UserProvider({ children }) {
     setPoints((prev) => prev + earnedPoints);
     setStreak((prev) => prev + 1);
 
-    // Milestone check (e.g., 100 points)
+    // check if reached milestones for rewards
     if (!milestone && points + earnedPoints >= 100) {
       setMilestone(true);
       Swal.fire({
@@ -97,7 +100,7 @@ export function UserProvider({ children }) {
     }
   };
 
-  // Reset streak every 24 hours
+  // streak is reset every 24 hours so can recount
   useEffect(() => {
     const resetStreak = () => setStreak(0);
     const timer = setInterval(resetStreak, 24 * 60 * 60 * 1000);
@@ -118,22 +121,20 @@ export function UserProvider({ children }) {
   );
 }
 
-// Custom hook to access user context
 export const useUserContext = () => useContext(UserContext);
 
-// Convenience hook to access just the username state
+// hook to access username and login state
 export const useUsername = () => {
   const { username } = useUserContext();
   return username;
 };
 
-// Convenience hook to access just the login status state
 export const useIsLoggedIn = () => {
   const { isLoggedIn } = useUserContext();
   return isLoggedIn;
 };
 
-// Convenience hook to access both the state and setters (for updates)
+// Convenience hook to access both the state and setters 
 export const useUserActions = () => {
   const { username, setUsername, isLoggedIn, setIsLoggedIn, preferences, setPreferences } = useUserContext();
   return { username, setUsername, isLoggedIn, setIsLoggedIn, preferences, setPreferences };
