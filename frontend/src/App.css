@@ -1,34 +1,34 @@
-/* Define background color styles for light and dark modes */
-.news-feed-background {
-    background-color: #F1F1F1; /* Default for light mode */
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    .news-feed-background {
-      background-color: #333333; /* Background for dark mode */
-    }
-  }
-
-.light-theme {
-  background-color: #ffffff;
-  color: #000000;
-}
-  
-.dark-theme {
-  background-color: #121212;
-  color: #ffffff;
-}
-  
+/* Base Body Styles  */
 body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-.bg-dark {
-  background-color: #1A1A1A;
+/* Light and Dark Theme Classes created */
+.light-theme {
+  background-color: #ffffff;
+  color: #000000;
 }
 
-.text-light {
-  color: #E8E8E8;
+.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+/* News Feed Background Styles added */
+.news-feed-background {
+  background-color: #F1F1F1; 
+
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .news-feed-background {
+    background-color: #333333; 
+  }
+}
+
+/* Utility Classes added */
+.bg-dark {
+  background-color: #1A1A1A;
 }
 
 .bg-light {
@@ -37,4 +37,8 @@ body {
 
 .text-dark {
   color: #000000;
+}
+
+.text-light {
+  color: #E8E8E8;
 }
