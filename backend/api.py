@@ -446,63 +446,65 @@ async def login(user: UserLogin):
         now = datetime.now()
         last_login = db_user.get("last_login")
         streak = db_user.get("streak", 0)
-        # Check if preferences exist and frequency is set
-        if "preferences" in db_user and "frequency" in db_user["preferences"]:
-            # Check if it's time to send an email
-            last_email_sent = db_user.get("last_email_sent")
-            frequency_hours = db_user["preferences"]["frequency"]
-            # If no last email sent or time since last email exceeds frequency
-            if not last_email_sent or (now - last_email_sent).total_seconds() / 3600 >= frequency_hours:
-                # Fetch news articles
-                try:
-                    # Use the existing get_news function to fetch articles
-                    news_response = await get_news(user.username)
-                    articles = news_response.get("articles", [])
-                    # Send email if articles exist
-                    if articles:
-                        summarized_articles = []
-                        for article in articles:
-                            summary = article.get('summary', 'No summary available')
-                            source_name = article.get('source', 'Unknown Source')
-                            summarized_articles.append({
-                                "title": article['title'],
-                                "source": source_name,
-                                "description": article['description'],
-                                "url": article['url'],
-                                "published_at": article.get('publishedAt'),
-                                "urlToImage": article.get('urlToImage'),
-                                "summary": summary,
-                                "isRead": False
-                            })
-                         # Export news feed as HTML
-                        html_content = export_newsfeed_as_html(summarized_articles)
-                        # Send the HTML email
-                        email_sent = send_newsfeed_html_email(
-                            user_email=db_user["email"],
-                            username=user.username,
-                            html_content=html_content
-                        )
-                        # Update last email sent time if email was sent successfully
-                        if email_sent:
-                            users_collection.update_one(
-                                {"username": user.username},
-                                {"$set": {"last_email_sent": now}}
-                            )
-                except Exception as e:
-                    print(f"Error processing news for email: {e}")
+
+        # Fetch news articles and send email every login
+        try:
+            # Use the existing get_news function to fetch articles
+            news_response = await get_news(user.username)
+            articles = news_response.get("articles", [])
+
+            if articles:
+                summarized_articles = []
+                for article in articles:
+                    summary = article.get('summary', 'No summary available')
+                    source_name = article.get('source', 'Unknown Source')
+                    summarized_articles.append({
+                        "title": article['title'],
+                        "source": source_name,
+                        "description": article['description'],
+                        "url": article['url'],
+                        "published_at": article.get('publishedAt'),
+                        "urlToImage": article.get('urlToImage'),
+                        "summary": summary,
+                        "isRead": False
+                    })
+
+                # Export news feed as HTML
+                html_content = export_newsfeed_as_html(summarized_articles)
+
+                # Send the HTML email
+                email_sent = send_newsfeed_html_email(
+                    user_email=db_user["email"],
+                    username=user.username,
+                    html_content=html_content
+                )
+
+                # Update last email sent time if email was sent successfully
+                if email_sent:
+                    users_collection.update_one(
+                        {"username": user.username},
+                        {"$set": {"last_email_sent": now}}
+                    )
+
+        except Exception as e:
+            print(f"Error processing news for email: {e}")
+
+        # Handle streak and last login update
         if last_login:
             last_login_date = last_login.date()
             if now.date() == last_login_date + timedelta(days=1):
-                streak += 1  
+                streak += 1  # Increment streak for consecutive days
             elif now.date() > last_login_date + timedelta(days=1):
-                streak = 0 
+                streak = 0  # Reset streak for missed days
+
         # Update last_login and streak
         users_collection.update_one(
             {"username": user.username},
             {"$set": {"last_login": now, "streak": streak}}
         )
+
         return JSONResponse(content={"message": "Login successful", "username": user.username})
-    
+
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
 # Endpoint to handle modifying of previously set user preferences
