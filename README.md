@@ -2,6 +2,8 @@
 
 Welcome to **Inbox Zing!** 🎉 This React-based application is designed to bring you the latest news and updates from various media outlets, all in one convenient place. Enjoy a sleek, intuitive interface with easy navigation options to set your preferences, customize your experience, and stay informed. Plus, earn points and level up as you read!
 
+Click here for the link to the application: https://inboxzing-frontend-739742167446.us-central1.run.app
+
 ---
 
 ## 👥 Team Members
