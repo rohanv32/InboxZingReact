@@ -79,7 +79,6 @@ fast_app = FastAPI()
 # connect to database (mongoDB)
 MONGO_URI = os.getenv("MONGO_URI")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
-print(f"Backend API Key: {NEWS_API_KEY}")
 openai.api_key = os.getenv("openai.api_key")
 
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
@@ -808,13 +807,29 @@ async def create_podcast(username: str):
         
         # Checking if the podcast with the same articles exists
         articles = user_news["articles"]
-        existing_podcast = db.podcasts.find_one({"username": username, "articles": articles})
+        existing_podcast = db.podcasts.find_one({"username": username})
+
         if existing_podcast:
-            
-            file_id = existing_podcast["audio_file_id"]
-            print(f"Found existing podcast with file_id: {file_id}")
-            audio_file = fs.get(file_id)
-            return StreamingResponse(BytesIO(audio_file.read()), media_type="audio/mpeg")
+            existing_articles = existing_podcast.get("articles", [])
+
+            if articles != existing_articles:
+                print("Not the same articles.")
+
+                file_id = existing_podcast.get("audio_file_id")
+                if file_id:
+                    print("The files were found.")
+                    fs.delete(file_id)
+                    print(f"Deleted audio file with file_id: {file_id}")
+
+                db.podcasts.delete_many({"username": username})
+                print(f"Deleted existing podcast record for username: {username}")
+
+            else:
+                
+                file_id = existing_podcast["audio_file_id"]
+                print(f"Found existing podcast with file_id: {file_id}")
+                audio_file = fs.get(file_id)
+                return StreamingResponse(BytesIO(audio_file.read()), media_type="audio/mpeg")
 
         # Generating a new podcast if no match is found
         preferences = user.get("preferences", {})
