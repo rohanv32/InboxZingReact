@@ -735,6 +735,7 @@ async def generate_podcast_script(articles, summary_style, username):
             f"- Summarize it concisely, mentioning the title, key points, and the source. Provide insights, context, or interesting interpretations beyond just reading the title and description. "
             f"- Add rhetorical questions (e.g., 'Can you believe it?' or 'What do you think about this?') to engage {username}.\n"
             f"- Incorporate humor, light commentary, or thought-provoking remarks to make the podcast engaging.\n"
+            f"- Ensure that humor used in summaries of serious topics, such as those related to death or accidents, remains sensitive and respectful. Strive to make it engaging and lighthearted without being insensitive or inappropriate.\n"
             f"- Transition smoothly between stories.\n\n"
             f"Conclude with an upbeat outro, thanking {username} and urging them to stay curious and motivated.\n"
             f" A motivational call-to-action for NYUAD students: 'Stay informed, keep earning points, and remember—once you hit 500 points, you’re just one free coffee from MYSC away!'.\n"
