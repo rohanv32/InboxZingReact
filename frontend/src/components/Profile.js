@@ -525,55 +525,11 @@ function Profile({ username, onNavigatetoPreferences, themeMode }) {
                 onNavigatetoPreferences('Preferences');
                 navigate('/preferences');
               }}
-              className={`w-full flex justify-center rounded-sm py-3 mb-4 transition duration-300`}
+              className={`w-full flex justify-center rounded-sm bg-[#D5C3C6] py-2 px-4 text-black`}
             >
               Update Preferences
             </button>
 
-            <button onClick={handleShowChangePassword} className={`w-full flex justify-center rounded-sm py-3 mb-4 transition duration-300`}>
-              Change Password
-            </button>
-
-            {showChangePassword && (
-              <div className="mt-6">
-                <h3 className={`text-lg font-semibold mb-4`}>Change Password</h3>
-
-                <form onSubmit={handlePasswordUpdate} className="space-y-4">
-                  <div>
-                    <input
-                      type="password"
-                      placeholder="Current Password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      className={`border rounded p-2 w-full`}
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="password"
-                      placeholder="New Password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      className={`border rounded p-2 w-full`}
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="password"
-                      placeholder="Confirm New Password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className={`border rounded p-2 w-full`}
-                    />
-                  </div>
-                  <button type="submit" className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600 transition duration-300">Update Password</button>
-                </form>
-              </div>
-            )}
-            {success && <p className="text-green-500 mt-4">{success}</p>}
           </div>
         )}
       </div>
