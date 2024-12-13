@@ -41,7 +41,7 @@ Olivia Xiang
   - Easily delete your account if you no longer wish to use the service.
 
 - **Podcast**
-  - A Podcast feature, with your current news selection and summarised in your preferred style for hand-free news updates!
+  - A Podcast feature, with your current news selection summarised in your preferred style for hand-free news updates!
 
 - **Emails**
   - Get your news feed sent directly to your inbox, as and when you prefer.
@@ -265,7 +265,7 @@ Please take a look at InboxZingDatabase.pdf for the database architecture diagra
 
 ## 🥳 Wireframe
 
-Please refer to the Figma link below for a prototype of the application.
+Please navigate to the Figma link below for a prototype of the application.
 **Link to Figma**: https://www.figma.com/design/bobVvvYCEht8CUIDfDtgos/InboxZing?node-id=0-1&t=1iDVuQ9jCMgNMdjh-1
 
 Refer to 'InboxZing Figma Wireframe and Data Flow Diagram.pdf' for the latest Figma wireframes and Data Flow Chart.
@@ -278,6 +278,7 @@ Refer to 'InboxZing Figma Wireframe and Data Flow Diagram.pdf' for the latest Fi
 - **Personalised news consumption experience for user**
 - **Localised features for university students to build community traction**
 - **Short-form news and gamification for user engagement**
+- **Language translation**
 
 ---
 
