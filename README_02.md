@@ -1,6 +1,6 @@
 # 📬 Inbox Zing - Full-Stack Application
 
-Welcome to **Inbox Zing!** 🎉 This React-based application is designed to bring you the latest news and updates from various media outlets, all in one convenient place. Enjoy a sleek, intuitive interface with easy navigation options to set your preferences, customize your experience, and stay informed. Plus, earn points and level up as you read!
+Welcome to **Inbox Zing!** 🎉 This React-based application is designed to bring you the latest news and updates from various media outlets, all in one convenient place. Enjoy a smooth, intuitive interface with easy navigation options to set your preferences, customize your experience, and stay informed. Plus, earn points and level up as you read!
 
 ---
 
@@ -16,7 +16,25 @@ Olivia Xiang
 
 ---
 
-## 🚀 Features
+## Why use InboxZing? What can we provide?
+
+- Our primary aim is to help you as a user stay informed and engaged with the world by looking at news differently.
+
+- The increasingly vast amount of news we have access to everyday can be a virtue and a vice, with all this information, we may feel overwhelmed and overloaded while trying to keep up with all of this in the midst of our daily schedules.
+
+- As a whole, traditional means of news consumption, combined with the increasingly shorter attention spans we witness nowadays, can make consuming news a chore, as demonstrated by the popularity of news distribtution through social media, such as TikTok or Instagram. While this is a good way to capture the attention of a broader audience and is also personalised, the way these algorithms are set up can force us down a rabbit hole of opinions and ideas, which may or may not always be accurate.
+
+- Most importantly, people are different, and they absorb new information in different ways. Some people tend to be auditory learners, others visual, and we all have different methods of retaining information important to us.
+
+- InboxZing is built to address those problems, with the goal of making the experience as personalised as you would like as a user.
+
+- With a simple, easy-to-understand interface, and news sourced directly from top media platforms, we provide you with the latest, accurate, news, and get you summrised version of the news you want, in the way you want. Be it Brief, Detailed, Humourous or Poetic, keep up with the world the way you want to.
+
+- The points feature gives you a chance to not just gain knowlegde, but also a way to get appreciated for your efforts, and redeem interesting prizes when you hit milestones!
+
+- By giving you your news as a podcast, we hope that this could just be another part of your daily routine that can be simplified and easily accessible, no matter how busy your day.
+
+## 🖼 Key Features
 
 - **🔒 Registration Page**: The entry point of the app provides options to **Sign Up** or **Login** to access your personalized news feed. Start by creating an account or logging into an existing one.
 
@@ -50,155 +68,16 @@ Olivia Xiang
 
 ---
 
-## 📋 Prerequisites
-
-Before you begin, make sure you have the following installed:
-
-- **Node.js** (v14 or later) & **npm** (Node Package Manager)
-  - [Download Node.js](https://nodejs.org/)
-- Python 3.x
-- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account for database setup
-- [NewsAPI](https://newsapi.org) account to obtain an API key
-- OpenAI API Key
-- Groq API Key
-- Sendgrid API Key
-- An email account to send email from using Sendgrid
-  
----
-
-## 🛠️ Installation & Setup
-
-To set up Inbox Zing locally, follow these steps:
-
-### Frontend:
-
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/rohanv32/InboxZingReact.git
-
-2. **Navigate to the Frontend Directory**:
-   ```bash
-   cd frontend
-
-3. **Configure Environment Variables**
-
-   Create a .env File, make sure to replace username, password, and API keys with your actual credentials:
-
-   ```bash
-   REACT_APP_BACKEND_URL=http://localhost:8000
-   PORT=3000
-   REACT_APP_NEWS_API_KEY=your_news_api_key_here
-
-5. **Install Dependencies**:
-   ```bash
-   npm install
-
-### Backend:
-
-1. **Navigate to the Backend Directory**
-   
-   ```bash
-   cd backend
-
-3. **Create a Virtual Environment**
-
-   Creating a virtual environment helps keep your project dependencies isolated.
-
-      ```bash
-      python -m venv venv
-      source venv/bin/activate  
-      # On Windows use `venv\Scripts\activate`
-
-4. **Install Dependencies**
-
-   To install the required dependencies for the project, run:
-
-      ```bash
-      pip install -r requirements.txt
-
-5. **Set Up MongoDB**
-
-     Create a new cluster in MongoDB Atlas.
-   
-     Add a database user with read and write permissions.
-   
-     Whitelist your IP address for database access.
-   
-     Obtain your connection string from MongoDB Atlas and replace the placeholder in the code with your connection string.
-   
-6. **Configure Environment Variables**
-
-   Create a .env File, make sure to replace username, password, and API keys with your actual credentials:
-   
-      ```bash
-      REACT_APP_FRONTEND_URL=http://localhost:3000
-      PORT=8000
-      MONGO_URI=mongodb+srv://<username>:<password>@newcluster.hj9pw.mongodb.net/?retryWrites=true&w=majority&appName=NewCluster
-      NEWS_API_KEY=your_news_api_key_here
-      openai.api_key=your_openai_key_here
-      REACT_APP_NEWS_API_KEY=your_news_api_key_here
-      GROQ_API_KEY=your_groq_api_key_here
-      SENDGRID_API_KEY=your_sendgrid_api_key_here
-      SENDGRID_FROM_EMAIL=your_email_here
-
-7. **Run the Backend Application**
-
-     Once you have set up your virtual environment, installed dependencies, and configured MongoDB and NewsAPI, you can run the application's backend:
-
-      ```bash
-        python3 api.py
-   
----
-
-## ▶️ Running the Full Stack Application
-
-After the setup is complete, you’re ready to launch Inbox Zing!
-
-1. **Start the Development Server**:
-   ```bash
-   npm start
-   ```
-   This will launch the app on `http://localhost:3000`. Open this link in your browser to start using Inbox Zing.
-
----
-
-## 🖼 Key Pages [Features]
-
-### 1. Authentication Page
-- **Sign Up** or **Login** to get started.
-
-### 2. Preferences Setup
-- Choose media outlets, country, and language to personalize your experience.
-- Set your **news delivery frequency** and **summary style**.
-
-### 3. News Feed
-- A curated feed with the latest articles from selected sources.
-
-
-### 4. Profile
-- View user preferences settings and statistics.
-
-### 5. Account Deletion
-- Easily delete your account if you no longer wish to use the service.
-
-### 6. Podcast
-- Podcast for a hand-free news update!
-
----
-
 ## 📋 Notes to the User
 
 - The podcast feature is dependent on the OpenAI API calls, so if you encounter any usage issues, please contact us and we will get it working as soon as we can.
 
 
-## 📚 Usage Guide
+## 🛠️ Use our Application!
 
-1. **Sign Up / Login**: Sign up for a new account or log into an existing account to access the application.
-2. **Customize Preferences**: Choose your preferred news sources, language, location, frequency of updates and summary style.
-3. **View and Manage Feed**: Stay updated with the latest news in a format and frequency that suit your preferences.
-4. **Profile**: Check current user preference setting and user reading statistics.
-5. **Delete Account**: Remove your account anytime through the **Delete Account** page.
-6. **Podcast**: Go to the podcast tab to generate a customized podcast.
+To use Inbox Zing, just click on the following link. Happy browsing!
+
+[Link to the website](https://inboxzing-frontend-739742167446.us-central1.run.app/)
 
 ---
 
@@ -272,7 +151,7 @@ Refer to 'InboxZing Figma Wireframe and Data Flow Diagram.pdf' for the latest Fi
 
 ---
 
-## ➕ Additional Features
+## ➕ Additional Features (For the Future of Our Application)
 
 - **On-demand podcast voice cloning**
 - **Personalised news consumption experience for user**
