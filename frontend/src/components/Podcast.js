@@ -1,24 +1,46 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Spin, Alert } from "antd";
 import { PlayCircleOutlined, PauseCircleOutlined } from "@ant-design/icons";
 import "react-h5-audio-player/lib/styles.css";
+import Swal from 'sweetalert2';
 
 const Podcast = ({ username, themeMode }) => {
   const [audioUrl, setAudioUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const popupShownRef = useRef(false);
   const audioRef = useRef(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPodcast = async () => {
+      if (popupShownRef.current) return;
+      popupShownRef.current = true;
       setIsLoading(true);
       setError(null);
 
       try {
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/podcast/${username}`);
         if (!response.ok) {
-          throw new Error("Failed to generate podcast");
+          popupShownRef.current = true;
+          //throw new Error("The podcast feature is not currently available, please try again later.");
+          await Swal.fire({
+                  title: "😸 says...",
+                  text: "The podcast feature is not currently available, please try again later.",
+                  imageUrl: "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGNkNmR3eDRtejQ2ODEwNWJlZ2p3Z2xlMXQ2MDRyczQ3Nm1ocm5oaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qUIm5wu6LAAog/giphy.gif",
+                  imageWidth: 400,
+                  imageHeight: 200,
+                  confirmButtonText: "I understand",
+                  padding: "2em",
+                  showCloseButton: false,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                navigate("/newsfeed");
+              }
+            });
         }
 
         const audioUrl = `${process.env.REACT_APP_BACKEND_URL}/podcast/${username}`;
@@ -30,10 +52,10 @@ const Podcast = ({ username, themeMode }) => {
       }
     };
 
-    if (username) {
+    if (username && !popupShownRef.current) {
       fetchPodcast();
     }
-  }, [username]);
+  }, [username, navigate]);
 
   const handlePlayPause = () => {
     const audioElement = audioRef.current;
